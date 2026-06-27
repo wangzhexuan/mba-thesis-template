@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBA论文项目初始化向导</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            display: flex;
+            background: #f0f0f0;
+            padding: 0;
+        }
+
+        .progress-step {
+            flex: 1;
+            padding: 15px 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+            font-weight: 600;
+        }
+
+        .progress-step.completed {
+            color: #4caf50;
+            border-bottom-color: #4caf50;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .step-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background: #e8eaf6;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .summary {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .summary h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            width: 150px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .summary-value {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .output-container {
+            display: none;
+            padding: 30px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .output-container pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .download-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #5a6fd6;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-message .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .success-message h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .success-message p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .next-steps {
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .next-steps h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .next-steps ol {
+            padding-left: 20px;
+        }
+
+        .next-steps li {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .next-steps code {
+            background: #e8eaf6;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-step {
+                font-size: 10px;
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MBA毕业论文写作项目初始化向导</h1>
+            <p>填写基本信息，自动生成项目配置和目录结构</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">1. 基本信息</div>
+            <div class="progress-step" data-step="2">2. 研究设计</div>
+            <div class="progress-step" data-step="3">3. 学校规范</div>
+            <div class="progress-step" data-step="4">4. 确认生成</div>
+        </div>
+        <div style="text-align: right; padding: 5px 15px; background: #f0f0f0;">
+            <button onclick="clearSavedData()" style="background: none; border: none; color: #999; cursor: pointer; font-size: 12px;">清除记忆的数据</button>
+        </div>
+
+        <div class="form-container">
+            <!-- Step 1: 基本信息 -->
+            <div class="step active" id="step1">
+                <h2 class="step-title">Step 1: 基本信息</h2>
+                <div class="form-group">
+                    <label for="project_name">项目名称 *</label>
+                    <input type="text" id="project_name" placeholder="例：A公司营销策略研究（用于创建项目目录）">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">论文题目 *</label>
+                        <input type="text" id="title" placeholder="例：A公司营销策略优化研究">
+                    </div>
+                    <div class="form-group">
+                        <label for="title_en">英文题目</label>
+                        <input type="text" id="title_en" placeholder="Research on...">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="author">作者姓名 *</label>
+                        <input type="text" id="author" placeholder="张三">
+                    </div>
+                    <div class="form-group">
+                        <label for="student_id">学号 *</label>
+                        <input type="text" id="student_id" placeholder="请输入学号">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="school">学校名称 *</label>
+                        <input type="text" id="school" placeholder="请输入学校名称">
+                    </div>
+                    <div class="form-group">
+                        <label for="college">学院名称</label>
+                        <input type="text" id="college" placeholder="管理学院">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="supervisor">导师姓名 *</label>
+                        <input type="text" id="supervisor" placeholder="李教授">
+                    </div>
+                    <div class="form-group">
+                        <label for="supervisor_title">导师职称</label>
+                        <input type="text" id="supervisor_title" placeholder="教授/副教授">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="research_direction">研究方向</label>
+                        <input type="text" id="research_direction" placeholder="市场营销/战略管理/财务管理">
+                    </div>
+                    <div class="form-group">
+                        <label for="completion_date">完成时间</label>
+                        <input type="text" id="completion_date" placeholder="2026年05月">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div></div>
+                    <button class="btn btn-primary" onclick="nextStep(2)">下一步 →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: 研究设计 -->
+            <div class="step" id="step2">
+                <h2 class="step-title">Step 2: 研究设计</h2>
+                <div class="form-group">
+                    <label for="research_type">研究类型 *</label>
+                    <select id="research_type">
+                        <option value="案例研究">案例研究</option>
+                        <option value="问卷调查">问卷调查</option>
+                        <option value="行动研究">行动研究</option>
+                        <option value="混合研究">混合研究</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>研究方法（多选）</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="method1" value="问卷调查">
+                            <label for="method1">问卷调查</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="method2" value="深度访谈">
+                            <label for="method2">深度访谈</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="method3" value="实地观察">
+                            <label for="method3">实地观察</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="method4" value="文档分析">
+                            <label for="method4">文档分析</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="method5" value="二手数据">
+                            <label for="method5">二手数据</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="method_custom_check" onchange="toggleCustomMethod()">
+                            <label for="method_custom_check">自定义...</label>
+                        </div>
+                    </div>
+                    <div id="custom_method_div" style="display:none; margin-top: 10px;">
+                        <input type="text" id="method_custom" placeholder="输入自定义研究方法，多个用逗号分隔" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>理论框架（多选）</label>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #667eea; font-size: 13px;">营销管理</strong>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item"><input type="checkbox" id="fw1" value="STP理论"><label for="fw1">STP理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw2" value="4C营销理论"><label for="fw2">4C营销理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw3" value="4P营销理论"><label for="fw3">4P营销理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw4" value="4R营销理论"><label for="fw4">4R营销理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw5" value="客户关系管理(CRM)"><label for="fw5">客户关系管理(CRM)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw6" value="顾客终身价值(CLV)"><label for="fw6">顾客终身价值(CLV)</label></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #667eea; font-size: 13px;">战略与环境分析</strong>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item"><input type="checkbox" id="fw7" value="波特五力模型"><label for="fw7">波特五力模型</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw8" value="PEST分析"><label for="fw8">PEST分析</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw9" value="SWOT分析"><label for="fw9">SWOT分析</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw10" value="价值链分析"><label for="fw10">价值链分析</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw11" value="资源基础观(RBV)"><label for="fw11">资源基础观(RBV)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw12" value="动态能力理论"><label for="fw12">动态能力理论</label></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #667eea; font-size: 13px;">运作与供应链管理</strong>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item"><input type="checkbox" id="fw13" value="精益生产"><label for="fw13">精益生产</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw14" value="六西格玛"><label for="fw14">六西格玛</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw15" value="TOC约束理论"><label for="fw15">TOC约束理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw16" value="供应链管理(SCM)"><label for="fw16">供应链管理(SCM)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw17" value="全面质量管理(TQM)"><label for="fw17">全面质量管理(TQM)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw18" value="业务流程再造(BPR)"><label for="fw18">业务流程再造(BPR)</label></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #667eea; font-size: 13px;">人力资源与组织行为</strong>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item"><input type="checkbox" id="fw19" value="激励理论"><label for="fw19">激励理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw20" value="人力资本理论"><label for="fw20">人力资本理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw21" value="组织学习理论"><label for="fw21">组织学习理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw22" value="领导力理论"><label for="fw22">领导力理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw23" value="胜任力模型"><label for="fw23">胜任力模型</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw24" value="心理契约理论"><label for="fw24">心理契约理论</label></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #667eea; font-size: 13px;">财务与金融</strong>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item"><input type="checkbox" id="fw25" value="资本结构理论"><label for="fw25">资本结构理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw26" value="投资组合理论"><label for="fw26">投资组合理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw27" value="现金流折现(DCF)"><label for="fw27">现金流折现(DCF)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw28" value="EVA经济增加值"><label for="fw28">EVA经济增加值</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw29" value="风险管理理论"><label for="fw29">风险管理理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw30" value="财务分析框架"><label for="fw30">财务分析框架</label></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #667eea; font-size: 13px;">绩效与创新管理</strong>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item"><input type="checkbox" id="fw31" value="平衡计分卡(BSC)"><label for="fw31">平衡计分卡(BSC)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw32" value="关键绩效指标(KPI)"><label for="fw32">关键绩效指标(KPI)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw33" value="OKR目标与关键成果"><label for="fw33">OKR目标与关键成果</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw34" value="创新扩散理论"><label for="fw34">创新扩散理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw35" value="颠覆性创新理论"><label for="fw35">颠覆性创新理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw36" value="开放式创新"><label for="fw36">开放式创新</label></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #667eea; font-size: 13px;">决策与信息系统</strong>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item"><input type="checkbox" id="fw37" value="有限理性理论"><label for="fw37">有限理性理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw38" value="博弈论"><label for="fw38">博弈论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw39" value="技术接受模型(TAM)"><label for="fw39">技术接受模型(TAM)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw40" value="信息系统成功模型"><label for="fw40">信息系统成功模型</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw41" value="数字化转型理论"><label for="fw41">数字化转型理论</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fw42" value="平台经济理论"><label for="fw42">平台经济理论</label></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="fw_custom_check" onchange="toggleCustomFramework()">
+                            <label for="fw_custom_check">自定义理论框架...</label>
+                        </div>
+                        <div id="custom_framework_div" style="display:none; margin-top: 10px;">
+                            <input type="text" id="fw_custom" placeholder="输入自定义理论框架，多个用逗号分隔" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="primary_question">主要研究问题 *</label>
+                    <textarea id="primary_question" placeholder="例：如何优化A公司的营销策略？"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sample_size">问卷样本量</label>
+                        <input type="number" id="sample_size" value="150" placeholder="150">
+                    </div>
+                    <div class="form-group">
+                        <label for="interview_count">访谈人数</label>
+                        <input type="number" id="interview_count" value="8" placeholder="8">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep(1)">← 上一步</button>
+                    <button class="btn btn-primary" onclick="nextStep(3)">下一步 →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: 学校规范 -->
+            <div class="step" id="step3">
+                <h2 class="step-title">Step 3: 学校规范</h2>
+                <div class="form-group">
+                    <label for="word_count">论文字数要求 *</label>
+                    <select id="word_count">
+                        <option value="15000">2万字以下</option>
+                        <option value="25000">2-3万字</option>
+                        <option value="30000" selected>3-4万字</option>
+                        <option value="40000">4万字以上</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="plagiarism_system">查重系统</label>
+                    <select id="plagiarism_system">
+                        <option value="知网">知网</option>
+                        <option value="万方">万方</option>
+                        <option value="维普">维普</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="plagiarism_threshold">查重率阈值（%）</label>
+                    <input type="number" id="plagiarism_threshold" value="15" placeholder="15">
+                </div>
+                <div class="form-group">
+                    <label for="reference_style">参考文献格式</label>
+                    <select id="reference_style">
+                        <option value="GB/T 7714-2015">GB/T 7714-2015</option>
+                        <option value="APA">APA</option>
+                        <option value="MLA">MLA</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep(2)">← 上一步</button>
+                    <button class="btn btn-primary" onclick="nextStep(4)">下一步 →</button>
+                </div>
+            </div>
+
+            <!-- Step 4: 确认生成 -->
+            <div class="step" id="step4">
+                <h2 class="step-title">Step 4: 确认并生成</h2>
+                
+                <div class="summary" id="summary">
+                    <!-- 动态生成 -->
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep(3)">← 上一步</button>
+                    <button class="btn btn-success" onclick="generateConfig()">生成配置文件</button>
+                </div>
+            </div>
+
+            <!-- 完成页面 -->
+            <div class="success-message" id="successMessage">
+                <div class="icon">✅</div>
+                <h2>配置生成成功！</h2>
+                <p id="successMessageText">一键下载完整项目，解压即可使用</p>
+                
+                <div class="download-buttons">
+                    <button class="download-btn" onclick="downloadProjectZip()" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); font-size: 18px; padding: 18px 40px; border-radius: 12px;">
+                        📦 下载项目（ZIP）
+                    </button>
+                </div>
+
+                <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: left;">
+                    <p style="font-weight: 600; margin-bottom: 10px;">使用方法：</p>
+                    <code style="display: block; padding: 10px; background: #1e1e1e; color: #d4d4d4; border-radius: 4px;">
+                        1. 下载 ZIP 文件<br>
+                        2. 解压到你的工作目录<br>
+                        3. 进入项目文件夹开始写作
+                    </code>
+                </div>
+
+                <div class="output-container" id="outputContainer">
+                    <pre id="outputContent"></pre>
+                </div>
+
+                <div class="next-steps">
+                    <h3>后续步骤</h3>
+                    <ol>
+                        <li>解压下载的 ZIP 文件</li>
+                        <li>进入项目目录</li>
+                        <li>阅读 <code>workflows/00-setup.md</code> 了解项目概况</li>
+                        <li>按照 <code>workflows/</code> 下的工作流文档逐步推进</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 嵌入的模板文件内容
+        const TEMPLATE_FILES = {"workflows/00-setup.md": "# Phase 0: 项目初始化\n\n## 目标\n\n完成MBA论文写作项目的初始化配置，包括：\n- 确认论文选题和研究方向\n- 配置论文基本信息\n- 了解学校格式规范\n- 建立项目目录结构\n- 初始化Claude Code工作环境\n\n## 前置条件\n\n- [ ] 已确定论文选题方向\n- [ ] 已了解学校对MBA论文的基本要求\n- [ ] 已安装Claude Code并配置好Skills\n\n## 核心步骤\n\n### Step 1: 运行初始化向导\n\n```bash\n# 进入项目目录\ncd mba-thesis-template\n\n# 运行交互式初始化脚本\n./init.sh\n```\n\n向导将引导你完成以下配置：\n1. **基本信息**：论文题目、作者、学校、导师等\n2. **研究设计**：研究类型、方法、理论框架\n3. **学校规范**：字数要求、查重标准、格式规范\n\n### Step 2: 确认配置文件\n\n初始化完成后，检查生成的配置文件：\n\n```\nconfig/\n├── thesis-config.yaml      # 论文核心配置\n├── school-format.yaml      # 学校格式规范\n├── research-framework.yaml # 研究框架配置\n└── defense-config.yaml     # 答辩准备配置\n```\n\n### Step 3: 确认目录结构\n\n检查项目目录结构是否完整：\n\n```\nmba-thesis-template/\n├── config/          # 配置文件\n├── workflows/       # 工作流文档\n├── skills/          # Skills工具包\n├── templates/       # 文档模板\n├── sources/         # 文献资料\n├── drafts/          # 论文草稿\n├── reviews/         # 审稿意见\n├── output/          # 输出文件\n├── README.md        # 项目说明\n├── AGENTS.md        # Claude Code指令\n├── CLAUDE.md        # 行为准则\n└── init.sh          # 初始化脚本\n```\n\n### Step 4: 熟悉工作流文档\n\n浏览 `workflows/` 目录下的7个工作流文档，了解论文写作全流程：\n\n| 阶段 | 文档 | 核心任务 |\n|------|------|---------|\n| Phase 0 | 00-setup.md | 项目初始化（本文档） |\n| Phase 1 | 01-literature.md | 文献检索与管理 |\n| Phase 2 | 02-framework.md | 框架设计 |\n| Phase 3 | 03-data-collection.md | 数据收集 |\n| Phase 4 | 04-writing.md | 内容生成 |\n| Phase 5 | 05-review.md | 质量审校 |\n| Phase 6 | 06-defense.md | 答辩准备 |\n\n### Step 5: 了解Skills工具包\n\n阅读 `skills/skills-guide.md` 和 `skills/skills-quickref.md`，了解可用的Skills及其使用方法。\n\n## Skills调用\n\n本阶段主要使用的Skills：\n\n| Skill | 用途 | 命令 |\n|-------|------|------|\n| `/markitdown` | 转换已有资料为Markdown | 如有已有资料需要转换 |\n| `/pdf` | 读取PDF文档 | 如有PDF格式的开题报告等 |\n\n## 输出物\n\n- [x] 配置文件已生成（config/目录）\n- [x] 项目目录结构已建立\n- [x] README.md已更新\n- [x] AGENTS.md已配置\n\n## 检查点\n\n### 配置完整性检查\n\n- [ ] `thesis-config.yaml` 中的必填项已填写\n  - [ ] 论文题目\n  - [ ] 作者姓名\n  - [ ] 学号\n  - [ ] 学校名称\n  - [ ] 导师姓名\n- [ ] `school-format.yaml` 中的格式要求已确认\n- [ ] `research-framework.yaml` 中的理论框架已选择\n\n### 目录结构检查\n\n- [ ] 所有必要目录已创建\n- [ ] 文献分类目录（Classic/KeyTexts/Supporting）已建立\n- [ ] 章节草稿目录已建立\n\n## 常见问题\n\n### Q1: 初始化脚本运行失败怎么办？\n\n**解决方案**：\n1. 检查脚本是否有执行权限：`chmod +x init.sh`\n2. 检查bash版本：需要bash 4.0+\n3. 手动创建配置文件：参考模板手动填写\n\n### Q2: 不确定选题是否合适怎么办？\n\n**建议**：\n1. 参考同校往届MBA论文选题\n2. 选择与工作相关的实际问题\n3. 确保有足够的数据来源\n4. 咨询导师意见\n\n### Q3: 学校格式规范不确定怎么办？\n\n**解决方案**：\n1. 查阅学校研究生院官网的论文写作规范\n2. 参考同校优秀毕业论文\n3. 咨询导师或学长学姐\n4. 先按通用规范配置，后续根据要求调整\n\n### Q4: 理论框架不知道怎么选择？\n\n**建议**：\n1. 根据研究问题类型选择\n   - 营销类：STP、4P、4C\n   - 战略类：波特五力、SWOT、PEST\n   - 运营类：BSC、KPI、PDCA\n2. 参考同类研究使用的理论框架\n3. 咨询导师意见\n\n## 下一步\n\n完成初始化后，进入下一阶段：\n\n→ [Phase 1: 文献检索与管理](./01-literature.md)\n", "workflows/01-literature.md": "# Phase 1: 文献检索与管理\n\n## 目标\n\n完成论文所需文献的检索、筛选、分类和综述撰写，包括：\n- 建立系统的文献检索策略\n- 收集和整理核心文献\n- 撰写高质量的文献综述\n- 建立文献管理系统\n\n## 前置条件\n\n- [ ] 已完成项目初始化（Phase 0）\n- [ ] 已确定研究方向和关键词\n- [ ] 已配置 `thesis-config.yaml` 中的关键词\n\n## 核心步骤\n\n### Step 1: 制定文献检索策略\n\n#### 1.1 确定检索关键词\n\n根据 `thesis-config.yaml` 中的关键词，扩展检索词：\n\n```\n核心关键词：\n├── 中文关键词（3-5个）\n├── 英文关键词（3-5个）\n├── 同义词/近义词\n└── 上位词/下位词\n```\n\n#### 1.2 确定检索数据库\n\n**中文数据库**：\n- CNKI（中国知网）：核心期刊、硕博论文\n- 万方数据：期刊、会议论文\n- 维普期刊：中文期刊\n\n**英文数据库**：\n- Web of Science：国际核心期刊\n- Scopus：综合性学术数据库\n- Google Scholar：综合性搜索\n\n#### 1.3 确定文献筛选标准\n\n| 标准 | 要求 |\n|------|------|\n| 时间范围 | 近5-10年为主 |\n| 文献类型 | 期刊论文、学位论文、著作 |\n| 质量标准 | 核心期刊、SCI/SSCI |\n| 语言分布 | 中文60-70%，英文30-40% |\n| 数量要求 | 总计50篇以上 |\n\n### Step 2: 执行文献检索\n\n#### 2.1 中文文献检索\n\n```bash\n# 使用paper-lookup Skills检索文献\n/paper-lookup \"关键词1 AND 关键词2\"\n```\n\n**检索步骤**：\n1. 在CNKI中使用高级检索\n2. 设置时间、来源、基金等筛选条件\n3. 按被引次数排序\n4. 导出文献信息（EndNote格式）\n\n#### 2.2 英文文献检索\n\n```bash\n# 使用research-lookup Skills扩展检索\n/research-lookup \"keyword1 AND keyword2\"\n```\n\n**检索步骤**：\n1. 在Web of Science中使用高级检索\n2. 设置时间、文献类型等筛选条件\n3. 按被引次数排序\n4. 导出文献信息（RIS格式）\n\n#### 2.3 文献追溯\n\n```bash\n# 使用citation-management Skills追踪引用网络\n/citation-management\n```\n\n**追溯方法**：\n- 向后追溯：查看核心文献的参考文献\n- 向前追踪：查看谁引用了核心文献\n- 滚雪球法：从核心文献扩展到相关文献\n\n### Step 3: 文献筛选与分类\n\n#### 3.1 文献筛选流程\n\n```\n初筛（阅读标题和摘要）\n    ↓\n复筛（阅读全文）\n    ↓\n精读（提取关键信息）\n    ↓\n分类（建立文献矩阵）\n```\n\n#### 3.2 文献分类体系\n\n按照金字塔结构分类：\n\n| 类别 | 比例 | 说明 | 存放位置 |\n|------|------|------|---------|\n| 经典文献 | 5-10% | 领域奠基性文献 | `sources/Classic/` |\n| 核心文献 | 20-30% | 最新高质量研究 | `sources/KeyTexts/` |\n| 支撑文献 | 60-70% | 辅助论证的文献 | `sources/Supporting/` |\n\n#### 3.3 建立文献矩阵\n\n使用Excel或Markdown建立文献矩阵：\n\n| 序号 | 作者 | 年份 | 题目 | 核心观点 | 研究方法 | 与本研究关系 |\n|------|------|------|------|---------|---------|-------------|\n| 1 | | | | | | |\n| 2 | | | | | | |\n\n### Step 4: 文献精读与笔记\n\n#### 4.1 精读方法\n\n```\n第一遍：快速浏览\n├── 阅读摘要、引言、结论\n├── 了解研究问题和主要发现\n└── 判断是否需要精读\n\n第二遍：仔细阅读\n├── 理解研究设计和方法\n├── 分析数据和结果\n└── 记录关键信息\n\n第三遍：批判性阅读\n├── 评估研究质量\n├── 识别研究局限\n└── 思考与本研究的关系\n```\n\n#### 4.2 文献笔记模板\n\n```markdown\n## 文献笔记：[文献标题]\n\n**基本信息**\n- 作者：\n- 年份：\n- 期刊/出版社：\n- DOI：\n\n**核心内容**\n- 研究问题：\n- 研究方法：\n- 主要发现：\n- 理论贡献：\n\n**与本研究关系**\n- 启发点：\n- 差异点：\n- 可引用内容：\n\n**个人评价**\n- 优点：\n- 局限：\n- 值得借鉴：\n```\n\n### Step 5: 撰写文献综述\n\n#### 5.1 文献综述结构\n\n```\n2.1 理论基础\n├── 2.1.1 [理论1]的内涵与发展\n├── 2.1.2 [理论2]的核心概念\n└── 2.1.3 [理论3]的应用演进\n\n2.2 国内外研究现状\n├── 2.2.1 [主题1]研究综述\n├── 2.2.2 [主题2]研究综述\n└── 2.2.3 [主题3]研究综述\n\n2.3 文献评述\n├── 2.3.1 现有研究的贡献\n├── 2.3.2 现有研究的不足\n└── 2.3.3 本研究的切入点\n```\n\n#### 5.2 使用Skills辅助撰写\n\n```bash\n# 使用literature-review Skills生成综述框架\n/literature-review\n\n# 使用scientific-writing Skills润色学术表达\n/scientific-writing\n\n# 使用awesome-ai-research-writing Skills中英互译\n/awesome-ai-research-writing\n```\n\n#### 5.3 文献综述写作要点\n\n1. **逻辑清晰**：按主题/时间/方法组织\n2. **批判性分析**：不只是罗列，要有评价\n3. **突出空白**：指出现有研究的不足\n4. **自然过渡**：引出本研究的必要性\n5. **引用规范**：准确引用，避免抄袭\n\n## Skills调用\n\n本阶段主要使用的Skills：\n\n| Skill | 用途 | 命令 |\n|-------|------|------|\n| `/paper-lookup` | 检索学术文献 | `/paper-lookup \"关键词\"` |\n| `/research-lookup` | 扩展研究信息 | `/research-lookup \"主题\"` |\n| `/citation-management` | 管理参考文献 | `/citation-management` |\n| `/literature-review` | 辅助撰写综述 | `/literature-review` |\n| `/scientific-writing` | 学术写作润色 | `/scientific-writing` |\n| `/pdf` | 读取PDF文献 | `/pdf` |\n| `/markitdown` | 转换文献格式 | `/markitdown` |\n\n## 输出物\n\n- [x] 文献检索报告\n- [x] 文献分类清单（sources/目录）\n- [x] 文献矩阵表\n- [x] 文献综述初稿（drafts/chapter2-literature.md）\n- [x] 参考文献列表（output/references.bib）\n\n## 检查点\n\n### 文献数量检查\n\n- [ ] 总文献数量 ≥ 50篇\n- [ ] 中文文献 ≥ 30篇\n- [ ] 英文文献 ≥ 20篇\n- [ ] 近5年文献 ≥ 20篇\n- [ ] 核心期刊文献占比 ≥ 60%\n\n### 文献质量检查\n\n- [ ] 经典文献已覆盖\n- [ ] 最新研究已纳入\n- [ ] 高被引文献已引用\n- [ ] 导师推荐文献已纳入\n\n### 综述质量检查\n\n- [ ] 结构逻辑清晰\n- [ ] 批判性分析到位\n- [ ] 研究空白已识别\n- [ ] 引用格式规范\n- [ ] 字数符合要求（5000-8000字）\n\n## 常见问题\n\n### Q1: 文献太多不知道怎么筛选？\n\n**建议**：\n1. 先读综述类文献，快速了解领域全貌\n2. 优先选择核心期刊和高被引文献\n3. 与研究主题相关度低的果断舍弃\n4. 保持文献金字塔结构\n\n### Q2: 英文文献读不懂怎么办？\n\n**解决方案**：\n1. 先读中文综述了解基本概念\n2. 使用翻译工具辅助阅读\n3. 重点阅读摘要、图表、结论\n4. 请教导师或同学\n\n### Q3: 文献综述写成流水账怎么办？\n\n**改进方法**：\n1. 按主题而非按文献组织\n2. 加入对比和评价\n3. 使用连接词增强逻辑性\n4. 每段有明确的主题句\n\n### Q4: 引用格式不统一怎么办？\n\n**解决方案**：\n1. 使用Zotero/EndNote等工具管理\n2. 使用 `/citation-management` Skills格式化\n3. 统一使用GB/T 7714-2015格式\n4. 最终统一检查\n\n## 下一步\n\n完成文献综述后，进入下一阶段：\n\n→ [Phase 2: 框架设计](./02-framework.md)\n", "workflows/02-framework.md": "# Phase 2: 框架设计\n\n## 目标\n\n完成论文的理论框架设计和研究方法选择，包括：\n- 确定理论框架\n- 设计研究模型\n- 选择研究方法\n- 制定技术路线\n- 绘制研究框架图\n\n## 前置条件\n\n- [ ] 已完成文献综述（Phase 1）\n- [ ] 已确定研究问题\n- [ ] 已配置 `research-framework.yaml`\n\n## 核心步骤\n\n### Step 1: 确定理论框架\n\n#### 1.1 理论框架选择原则\n\n| 原则 | 说明 |\n|------|------|\n| 适用性 | 与研究问题匹配 |\n| 成熟性 | 理论体系完整 |\n| 可操作性 | 能指导实际分析 |\n| 创新性 | 有新的应用视角 |\n\n#### 1.2 常用理论框架\n\n**营销管理类**：\n- STP理论：市场细分、目标市场、市场定位\n- 4P营销组合：产品、价格、渠道、促销\n- 4C营销理论：顾客、成本、便利、沟通\n- 7P服务营销：在4P基础上增加人员、过程、有形展示\n- CRM理论：客户关系管理\n\n**战略管理类**：\n- 波特五力模型：行业竞争分析\n- PEST分析：宏观环境分析\n- SWOT分析：内外部环境综合分析\n- 价值链分析：企业内部活动分析\n- 资源基础观（RBV）：企业资源与竞争优势\n\n**运营管理类**：\n- 平衡计分卡（BSC）：战略绩效管理\n- 关键绩效指标（KPI）：绩效指标设计\n- PDCA循环：持续改进\n- 精益管理：消除浪费\n- 六西格玛：质量管理\n\n#### 1.3 配置理论框架\n\n编辑 `config/research-framework.yaml`：\n\n```yaml\ntheoretical_framework:\n  - name: \"STP理论\"\n    description: \"市场细分、目标市场选择和市场定位的战略框架\"\n    application: \"用于分析研究对象的客户细分和市场定位策略\"\n    key_references:\n      - \"Kotler, P. (2016). Marketing Management\"\n    chapter_applied: [3, 4]\n```\n\n### Step 2: 设计研究模型\n\n#### 2.1 研究模型类型\n\n```\n研究模型选择：\n├── 概念模型：基于理论构建的逻辑关系图\n├── 分析框架：指导数据分析的结构\n└── 优化框架：提出改进方案的逻辑\n```\n\n#### 2.2 研究模型设计步骤\n\n1. **识别核心变量**：从研究问题中提取关键变量\n2. **建立关系假设**：基于理论分析变量间关系\n3. **绘制模型图**：可视化展示研究模型\n4. **验证模型合理性**：与理论和文献对比\n\n#### 2.3 使用Skills绘制框架图\n\n```bash\n# 使用scientific-schematics Skills生成研究框架图\n/scientific-schematics\n\n# 使用academic-plotting Skills生成分析图表\n/academic-plotting\n```\n\n### Step 3: 选择研究方法\n\n#### 3.1 研究方法选择\n\n| 研究类型 | 适用场景 | 数据收集 | 数据分析 |\n|---------|---------|---------|---------|\n| 案例研究 | 深入分析单一/多个案例 | 访谈、文档、观察 | 内容分析、主题分析 |\n| 问卷调查 | 大样本量化研究 | 问卷 | 统计分析 |\n| 行动研究 | 解决实际问题 | 实践记录 | 反思总结 |\n| 混合研究 | 多角度验证 | 多种方法 | 综合分析 |\n\n#### 3.2 数据收集方法\n\n**问卷调查**：\n- 优点：样本量大、可量化、可推广\n- 缺点：深度不足、回收率影响\n- 适用：了解员工/客户感知\n\n**深度访谈**：\n- 优点：信息深入、灵活\n- 缺点：样本量小、主观性\n- 适用：了解管理者观点\n\n**文档分析**：\n- 优点：客观、可追溯\n- 缺点：可能不完整\n- 适用：分析企业资料\n\n**实地观察**：\n- 优点：直观、真实\n- 缺点：耗时、主观\n- 适用：了解实际运作\n\n#### 3.3 配置研究方法\n\n编辑 `config/thesis-config.yaml`：\n\n```yaml\nmethodology:\n  type: \"case_study\"\n  methods:\n    - \"questionnaire\"\n    - \"interview\"\n  sample_size: 150\n  interview_count: 8\n  data_collection_period: \"2025年3月-5月\"\n```\n\n### Step 4: 制定技术路线\n\n#### 4.1 技术路线要素\n\n```\n技术路线图应包含：\n├── 研究起点：问题提出\n├── 研究过程：各阶段任务\n├── 研究方法：每个阶段使用的方法\n├── 研究产出：各阶段成果\n└── 研究终点：结论与展望\n```\n\n#### 4.2 技术路线示例\n\n```\n研究背景与问题提出\n        ↓\n文献综述与理论框架构建\n        ↓\n研究设计与方法选择\n        ↓\n数据收集（问卷+访谈）\n        ↓\n数据分析与问题诊断\n        ↓\n策略设计与优化\n        ↓\n方案验证与实施建议\n        ↓\n研究结论与展望\n```\n\n#### 4.3 使用Skills生成技术路线图\n\n```bash\n# 使用scientific-schematics Skills生成技术路线图\n/scientific-schematics \"技术路线图\"\n```\n\n### Step 5: 完成第一章写作\n\n#### 5.1 第一章结构\n\n```\n第1章 绪论\n├── 1.1 研究背景及研究意义\n│   ├── 1.1.1 研究背景\n│   │   ├── 宏观背景（行业/政策）\n│   │   ├── 行业背景（市场/竞争）\n│   │   └── 微观背景（企业现状）\n│   ├── 1.1.2 研究意义\n│   │   ├── 理论意义\n│   │   └── 实践意义\n│   └── 1.1.3 研究目的\n├── 1.2 研究内容与研究方法\n│   ├── 1.2.1 研究内容\n│   ├── 1.2.2 研究方法\n│   └── 1.2.3 技术路线\n└── 1.3 研究创新点\n    ├── 1.3.1 理论创新\n    └── 1.3.2 实践创新\n```\n\n#### 5.2 使用Skills辅助写作\n\n```bash\n# 使用scientific-writing Skills撰写学术正文\n/scientific-writing\n\n# 使用awesome-ai-research-writing Skills润色\n/awesome-ai-research-writing\n```\n\n## Skills调用\n\n本阶段主要使用的Skills：\n\n| Skill | 用途 | 命令 |\n|-------|------|------|\n| `/scientific-schematics` | 绘制研究框架图 | `/scientific-schematics` |\n| `/academic-plotting` | 生成分析图表 | `/academic-plotting` |\n| `/scientific-writing` | 学术写作 | `/scientific-writing` |\n| `/awesome-ai-research-writing` | 写作润色 | `/awesome-ai-research-writing` |\n| `/scientific-critical-thinking` | 逻辑检查 | `/scientific-critical-thinking` |\n\n## 输出物\n\n- [x] 理论框架配置（config/research-framework.yaml）\n- [x] 研究框架图\n- [x] 技术路线图\n- [x] 第一章初稿（drafts/chapter1-introduction.md）\n\n## 检查点\n\n### 理论框架检查\n\n- [ ] 理论选择有文献支持\n- [ ] 理论与研究问题匹配\n- [ ] 理论应用方式明确\n- [ ] 理论框架图清晰\n\n### 研究方法检查\n\n- [ ] 研究类型选择合理\n- [ ] 数据收集方法可行\n- [ ] 样本量满足要求\n- [ ] 数据分析方法明确\n\n### 第一章检查\n\n- [ ] 研究背景充分\n- [ ] 研究意义明确\n- [ ] 研究问题清晰\n- [ ] 技术路线完整\n- [ ] 创新点突出\n- [ ] 字数符合要求（3000-5000字）\n\n## 常见问题\n\n### Q1: 理论框架不知道怎么选？\n\n**建议**：\n1. 阅读同类研究，看别人用什么理论\n2. 根据研究问题类型选择\n3. 咨询导师意见\n4. 可以组合使用多个理论\n\n### Q2: 研究框架图怎么画？\n\n**解决方案**：\n1. 使用 `/scientific-schematics` Skills自动生成\n2. 使用ProcessOn、draw.io等工具\n3. 参考同类论文的框架图\n4. 请导师审阅修改\n\n### Q3: 创新点不知道怎么写？\n\n**建议**：\n1. 与现有研究对比，找差异点\n2. 从理论应用、研究视角、方法等角度挖掘\n3. 不要过度夸大，实事求是\n4. 咨询导师意见\n\n### Q4: 技术路线图与研究内容不一致？\n\n**解决方案**：\n1. 以研究问题为核心\n2. 确保各环节逻辑连贯\n3. 技术路线要反映实际研究过程\n4. 与导师讨论确认\n\n## 下一步\n\n完成框架设计后，进入下一阶段：\n\n→ [Phase 3: 数据收集](./03-data-collection.md)\n", "workflows/03-data-collection.md": "# Phase 3: 数据收集\n\n## 目标\n\n完成论文所需数据的收集、整理和初步分析，包括：\n- 设计问卷和访谈提纲\n- 执行数据收集\n- 整理和清洗数据\n- 进行初步分析\n\n## 前置条件\n\n- [ ] 已完成框架设计（Phase 2）\n- [ ] 已确定研究方法\n- [ ] 已配置 `thesis-config.yaml` 中的方法论部分\n\n## 核心步骤\n\n### Step 1: 设计问卷\n\n#### 1.1 问卷设计原则\n\n| 原则 | 说明 |\n|------|------|\n| 目的明确 | 每个题项对应研究问题 |\n| 简洁易懂 | 语言清晰，避免歧义 |\n| 逻辑合理 | 题目顺序符合逻辑 |\n| 长度适中 | 控制在15-20分钟完成 |\n| 信效度高 | 经过预测试验证 |\n\n#### 1.2 问卷结构设计\n\n```\n问卷结构：\n├── 第一部分：导语\n│   ├── 调查目的说明\n│   ├── 填写说明\n│   └── 保密承诺\n├── 第二部分：基本信息\n│   ├── 性别\n│   ├── 年龄\n│   ├── 学历\n│   ├── 工作年限\n│   └── 职位级别\n├── 第三部分：核心量表\n│   ├── 维度1：题项1-N\n│   ├── 维度2：题项1-N\n│   └── 维度3：题项1-N\n└── 第四部分：开放性问题（可选）\n```\n\n#### 1.3 量表选择\n\n| 量表类型 | 适用场景 | 示例 |\n|---------|---------|------|\n| 李克特5点量表 | 态度、感知测量 | 非常不同意-非常同意 |\n| 李克特7点量表 | 精确态度测量 | 更细致的区分 |\n| 语义差异量表 | 概念感知测量 | 两极形容词 |\n| 频率量表 | 行为频率测量 | 从不-总是 |\n\n#### 1.4 使用模板设计问卷\n\n```bash\n# 参考问卷模板\ncat templates/questionnaire.md\n```\n\n### Step 2: 设计访谈提纲\n\n#### 2.1 访谈类型选择\n\n| 访谈类型 | 适用场景 | 时长 |\n|---------|---------|------|\n| 结构化访谈 | 标准化信息收集 | 30-45分钟 |\n| 半结构化访谈 | 深入探索性研究 | 45-60分钟 |\n| 非结构化访谈 | 开放性探索 | 60-90分钟 |\n\n#### 2.2 访谈提纲设计\n\n```\n访谈提纲结构：\n├── 开场（5分钟）\n│   ├── 自我介绍\n│   ├── 访谈目的说明\n│   └── 录音许可\n├── 热身问题（5分钟）\n│   └── 背景了解\n├── 核心问题（30-40分钟）\n│   ├── 主题1：问题1-N\n│   ├── 主题2：问题1-N\n│   └── 主题3：问题1-N\n├── 总结问题（5分钟）\n│   └── 补充和确认\n└── 结束（5分钟）\n    ├── 感谢\n    └── 后续安排\n```\n\n#### 2.3 使用模板设计访谈提纲\n\n```bash\n# 参考访谈提纲模板\ncat templates/interview-guide.md\n```\n\n### Step 3: 确定样本\n\n#### 3.1 样本量确定\n\n| 研究方法 | 建议样本量 | 说明 |\n|---------|-----------|------|\n| 问卷调查 | 150-300份 | 有效回收率按60-70%计算 |\n| 深度访谈 | 8-15人 | 达到信息饱和 |\n| 案例研究 | 1-3个案例 | 深度分析 |\n\n#### 3.2 抽样方法\n\n**问卷抽样**：\n- 简单随机抽样\n- 分层抽样\n- 整群抽样\n- 便利抽样（MBA论文常用）\n\n**访谈对象选择**：\n- 目的性抽样\n- 最大差异抽样\n- 滚雪球抽样\n\n#### 3.3 样本分布设计\n\n```yaml\n# 问卷样本分布示例\nsample_distribution:\n  gender:\n    male: 50%    # 男性比例\n    female: 50%  # 女性比例\n  age:\n    \"25岁以下\": 10%\n    \"25-35岁\": 40%\n    \"36-45岁\": 35%\n    \"45岁以上\": 15%\n  tenure:\n    \"3年以下\": 20%\n    \"3-5年\": 30%\n    \"5-10年\": 35%\n    \"10年以上\": 15%\n```\n\n### Step 4: 执行数据收集\n\n#### 4.1 问卷发放\n\n**发放渠道**：\n- 问卷星/腾讯问卷等在线平台\n- 企业内部OA系统\n- 微信/邮件发送\n- 现场纸质问卷\n\n**注意事项**：\n- 说明调查目的和保密性\n- 设置合理的截止时间\n- 跟踪回收进度\n- 准备备选样本\n\n#### 4.2 访谈执行\n\n**访谈前准备**：\n- 联系访谈对象，说明目的\n- 预约时间和地点\n- 准备录音设备\n- 打印访谈提纲\n\n**访谈中注意**：\n- 营造轻松氛围\n- 按提纲引导，灵活追问\n- 做好录音和笔记\n- 控制访谈时间\n\n**访谈后工作**：\n- 24小时内整理录音\n- 转录为文字稿\n- 补充观察笔记\n- 发送感谢信\n\n#### 4.3 二手数据收集\n\n**数据来源**：\n- 企业内部报表、系统数据\n- 行业研究报告\n- 政府统计数据\n- 公司年报、公告\n\n**数据整理**：\n- 建立数据台账\n- 核实数据真实性\n- 统一数据口径\n- 标注数据来源\n\n### Step 5: 数据整理与清洗\n\n#### 5.1 问卷数据清洗\n\n```python\n# 数据清洗检查项\ncleaning_checklist = [\n    \"剔除填写时间过短的问卷（<3分钟）\",\n    \"剔除规律性作答（如全选3）\",\n    \"剔除关键题项缺失的问卷\",\n    \"检查反向题项的作答一致性\",\n    \"处理缺失值（删除/插补）\",\n    \"检查异常值\"\n]\n```\n\n#### 5.2 访谈数据整理\n\n```markdown\n# 访谈数据整理步骤\n\n1. 录音转录\n   - 使用讯飞听见等工具辅助\n   - 人工校对确保准确\n\n2. 文本编码\n   - 开放式编码：提取关键语句\n   - 主轴编码：归纳主题类别\n   - 选择性编码：提炼核心观点\n\n3. 建立编码表\n   | 编码 | 主题 | 频次 | 代表性语句 |\n   |------|------|------|-----------|\n   | A1 | | | |\n```\n\n### Step 6: 初步数据分析\n\n#### 6.1 问卷数据分析\n\n**描述性统计**：\n- 频率分布\n- 均值、标准差\n- 交叉分析\n\n**信效度检验**：\n- Cronbach's α系数（>0.7）\n- KMO值（>0.7）\n- 因子分析\n\n```bash\n# 使用Python进行数据分析\npython -c \"\nimport pandas as pd\n# 读取数据\ndf = pd.read_csv('data/questionnaire.csv')\n# 描述性统计\nprint(df.describe())\n\"\n```\n\n#### 6.2 访谈数据分析\n\n**主题分析法**：\n1. 熟悉数据\n2. 生成初始编码\n3. 搜索主题\n4. 审视主题\n5. 定义和命名主题\n6. 撰写报告\n\n## Skills调用\n\n本阶段主要使用的Skills：\n\n| Skill | 用途 | 命令 |\n|-------|------|------|\n| `/xlsx` | 处理问卷数据 | `/xlsx` |\n| `/scientific-writing` | 撰写研究方法 | `/scientific-writing` |\n| `/academic-plotting` | 生成统计图表 | `/academic-plotting` |\n| `/awesome-ai-research-writing` | 学术表达润色 | `/awesome-ai-research-writing` |\n\n## 输出物\n\n- [x] 问卷终稿\n- [x] 访谈提纲终稿\n- [x] 问卷数据文件（data/questionnaire.csv）\n- [x] 访谈转录稿（data/interviews/）\n- [x] 数据分析报告\n- [x] 第三章初稿（drafts/chapter3-analysis.md）\n\n## 检查点\n\n### 问卷检查\n\n- [ ] 题项与研究问题对应\n- [ ] 量表信效度达标\n- [ ] 问卷长度适中\n- [ ] 经过预测试\n- [ ] 获得导师/伦理批准\n\n### 访谈检查\n\n- [ ] 访谈提纲覆盖研究问题\n- [ ] 访谈对象具有代表性\n- [ ] 访谈记录完整\n- [ ] 录音已转录并校对\n\n### 数据检查\n\n- [ ] 样本量满足要求\n- [ ] 数据已清洗\n- [ ] 信效度达标\n- [ ] 数据分析方法正确\n\n## 常见问题\n\n### Q1: 问卷回收率低怎么办？\n\n**解决方案**：\n1. 简化问卷，缩短填写时间\n2. 提供小礼品激励\n3. 通过熟人关系发放\n4. 多渠道同时发放\n5. 及时提醒未填写者\n\n### Q2: 访谈对象不配合怎么办？\n\n**建议**：\n1. 提前沟通，说明研究价值\n2. 承诺保密和匿名\n3. 灵活安排时间地点\n4. 请导师或领导协助联系\n5. 准备备选对象\n\n### Q3: 数据质量不高怎么办？\n\n**解决方案**：\n1. 问卷设置测谎题\n2. 访谈时注意追问\n3. 多渠道数据交叉验证\n4. 诚实报告数据局限性\n\n### Q4: 样本代表性不足怎么办？\n\n**建议**：\n1. 承认局限性\n2. 说明样本选择理由\n3. 讨论对结论的影响\n4. 提出改进建议\n\n## 下一步\n\n完成数据收集后，进入下一阶段：\n\n→ [Phase 4: 内容生成](./04-writing.md)\n", "workflows/04-writing.md": "# Phase 4: 内容生成\n\n## 目标\n\n完成论文全部章节的撰写，包括：\n- 按章节顺序完成初稿\n- 制作图表和可视化\n- 整理参考文献\n- 生成论文终稿\n\n## 前置条件\n\n- [ ] 已完成数据收集（Phase 3）\n- [ ] 已完成数据分析\n- [ ] 已有各章节的初步框架\n\n## 核心步骤\n\n### Step 1: 制定写作计划\n\n#### 1.1 章节写作顺序建议\n\n```\n推荐写作顺序：\n1. 第三章：现状分析（数据最清晰）\n2. 第四章：策略优化（核心贡献）\n3. 第二章：文献综述（已有积累）\n4. 第一章：绪论（最后完善）\n5. 第五章：结论（总结全篇）\n```\n\n#### 1.2 写作进度规划\n\n| 章节 | 目标字数 | 计划天数 | 每日字数 |\n|------|---------|---------|---------|\n| 第一章 绪论 | 3000字 | 3天 | 1000字 |\n| 第二章 文献综述 | 6000字 | 6天 | 1000字 |\n| 第三章 现状分析 | 8000字 | 8天 | 1000字 |\n| 第四章 策略优化 | 8000字 | 8天 | 1000字 |\n| 第五章 结论 | 2000字 | 2天 | 1000字 |\n| **合计** | **27000字** | **27天** | **1000字** |\n\n### Step 2: 撰写各章节\n\n#### 2.1 第一章：绪论\n\n```\n第1章 绪论\n├── 1.1 研究背景及研究意义\n│   ├── 1.1.1 研究背景\n│   │   ├── 宏观背景（政策、经济环境）\n│   │   ├── 行业背景（市场、竞争格局）\n│   │   └── 微观背景（企业现状、问题）\n│   ├── 1.1.2 研究意义\n│   │   ├── 理论意义（对学术的贡献）\n│   │   └── 实践意义（对企业的价值）\n│   └── 1.1.3 研究目的\n├── 1.2 研究内容与研究方法\n│   ├── 1.2.1 研究内容\n│   ├── 1.2.2 研究方法\n│   └── 1.2.3 技术路线\n└── 1.3 研究创新点\n    ├── 1.3.1 理论创新\n    └── 1.3.2 实践创新\n```\n\n**写作要点**：\n- 背景要从宏观到微观层层递进\n- 意义要区分理论和实践\n- 创新点要实事求是\n\n#### 2.2 第二章：文献综述\n\n```\n第2章 相关理论与文献综述\n├── 2.1 核心概念界定\n│   ├── 2.1.1 [概念1]的定义\n│   ├── 2.1.2 [概念2]的定义\n│   └── 2.1.3 [概念3]的定义\n├── 2.2 理论基础\n│   ├── 2.2.1 [理论1]的内涵与发展\n│   ├── 2.2.2 [理论2]的核心观点\n│   └── 2.2.3 [理论3]的应用演进\n├── 2.3 国内外研究现状\n│   ├── 2.3.1 [主题1]研究综述\n│   ├── 2.3.2 [主题2]研究综述\n│   └── 2.3.3 [主题3]研究综述\n└── 2.4 文献评述\n    ├── 2.4.1 现有研究的贡献\n    ├── 2.4.2 现有研究的不足\n    └── 2.4.3 本研究的切入点\n```\n\n**写作要点**：\n- 综述要批判性分析，不是罗列\n- 要指出研究空白\n- 引用要规范\n\n#### 2.3 第三章：现状分析\n\n```\n第3章 [研究对象]现状分析\n├── 3.1 [研究对象]概况\n│   ├── 3.1.1 基本情况\n│   ├── 3.1.2 组织架构\n│   └── 3.1.3 业务现状\n├── 3.2 外部环境分析\n│   ├── 3.2.1 PEST宏观环境分析\n│   ├── 3.2.2 行业竞争分析（波特五力）\n│   └── 3.2.3 市场环境分析\n├── 3.3 内部环境分析\n│   ├── 3.3.1 资源能力分析\n│   ├── 3.3.2 SWOT综合分析\n│   └── 3.3.3 现存问题识别\n└── 3.4 调研数据分析\n    ├── 3.4.1 问卷调查结果\n    ├── 3.4.2 访谈核心发现\n    └── 3.4.3 问题诊断总结\n```\n\n**写作要点**：\n- 数据要真实可靠\n- 分析要有逻辑性\n- 图表要清晰规范\n\n#### 2.4 第四章：策略优化\n\n```\n第4章 [研究对象]优化策略\n├── 4.1 优化目标与原则\n│   ├── 4.1.1 优化目标\n│   └── 4.1.2 优化原则\n├── 4.2 [策略1]设计\n│   ├── 4.2.1 策略框架\n│   ├── 4.2.2 具体措施\n│   └── 4.2.3 实施路径\n├── 4.3 [策略2]设计\n│   ├── 4.3.1 策略框架\n│   ├── 4.3.2 具体措施\n│   └── 4.3.3 实施路径\n├── 4.4 [策略3]设计\n│   ├── 4.4.1 策略框架\n│   ├── 4.4.2 具体措施\n│   └── 4.4.3 实施路径\n└── 4.5 实施保障\n    ├── 4.5.1 组织保障\n    ├── 4.5.2 制度保障\n    ├── 4.5.3 资源保障\n    └── 4.5.4 风险控制\n```\n\n**写作要点**：\n- 策略要针对问题\n- 措施要具体可行\n- 要有实施路径\n\n#### 2.5 第五章：结论\n\n```\n第5章 结论与展望\n├── 5.1 研究结论\n│   ├── 5.1.1 主要结论\n│   └── 5.1.2 结论解读\n├── 5.2 研究启示\n│   ├── 5.2.1 理论启示\n│   └── 5.2.2 实践启示\n└── 5.3 研究局限与展望\n    ├── 5.3.1 研究局限\n    └── 5.3.2 未来展望\n```\n\n**写作要点**：\n- 结论要呼应研究问题\n- 启示要有价值\n- 局限要诚实\n\n### Step 3: 制作图表\n\n#### 3.1 图表类型选择\n\n| 内容 | 推荐图表 | 工具 |\n|------|---------|------|\n| 研究框架 | 流程图 | draw.io/ProcessOn |\n| 数据对比 | 柱状图 | Excel/Python |\n| 占比分析 | 饼图 | Excel/Python |\n| 趋势变化 | 折线图 | Excel/Python |\n| 相关分析 | 散点图 | Python |\n| 文献分布 | 热力图 | Python |\n\n#### 3.2 使用Skills生成图表\n\n```bash\n# 使用academic-plotting Skills生成统计图表\n/academic-plotting\n\n# 使用scientific-schematics Skills生成框架图\n/scientific-schematics\n```\n\n#### 3.3 图表规范\n\n```\n图表格式要求：\n├── 图片格式：PNG/JPG，300dpi以上\n├── 图表标题：宋体，小五号\n├── 图表编号：按章节编号（图3-1，表3-1）\n├── 图表位置：紧跟首次引用的段落后\n└── 数据来源：图表下方标注\n```\n\n### Step 4: 管理参考文献\n\n#### 4.1 参考文献格式\n\n**GB/T 7714-2015格式示例**：\n\n```\n[期刊论文]\n[1] 作者. 题名[J]. 刊名, 年, 卷(期): 起止页码.\n\n[专著]\n[2] 作者. 书名[M]. 出版地: 出版者, 出版年: 起止页码.\n\n[学位论文]\n[3] 作者. 题名[D]. 保存地: 保存单位, 年份.\n\n[电子文献]\n[4] 作者. 题名[EB/OL]. (发布日期)[引用日期]. 网址.\n```\n\n#### 4.2 使用Skills管理文献\n\n```bash\n# 使用citation-management Skills格式化引用\n/citation-management\n\n# 使用paper-lookup Skills验证文献信息\n/paper-lookup \"DOI或文献标题\"\n```\n\n#### 4.3 参考文献检查\n\n- [ ] 引用数量满足要求（≥50篇）\n- [ ] 中英文比例合理\n- [ ] 近5年文献占比≥40%\n- [ ] 引用格式统一\n- [ ] 正文中引用与文献列表对应\n\n### Step 5: 整合与完善\n\n#### 5.1 论文整合\n\n```bash\n# 使用docx Skills生成Word文档\n/docx\n\n# 或使用build_thesis.py脚本\npython templates/build_thesis.py\n```\n\n#### 5.2 内容检查清单\n\n- [ ] 各章节逻辑连贯\n- [ ] 论点有论据支撑\n- [ ] 数据引用准确\n- [ ] 图表与正文对应\n- [ ] 引用格式规范\n\n#### 5.3 格式检查清单\n\n- [ ] 字体字号符合规范\n- [ ] 行距段距正确\n- [ ] 页眉页脚设置\n- [ ] 目录自动生成\n- [ ] 图表编号连续\n\n## Skills调用\n\n本阶段主要使用的Skills：\n\n| Skill | 用途 | 命令 |\n|-------|------|------|\n| `/scientific-writing` | 学术正文写作 | `/scientific-writing` |\n| `/awesome-ai-research-writing` | 润色、翻译 | `/awesome-ai-research-writing` |\n| `/academic-plotting` | 生成统计图表 | `/academic-plotting` |\n| `/scientific-schematics` | 生成框架图 | `/scientific-schematics` |\n| `/citation-management` | 参考文献管理 | `/citation-management` |\n| `/docx` | 生成Word文档 | `/docx` |\n| `/humanizer` | 去AI化润色 | `/humanizer` |\n\n## 输出物\n\n- [x] 第一章初稿（drafts/chapter1-introduction.md）\n- [x] 第二章初稿（drafts/chapter2-literature.md）\n- [x] 第三章初稿（drafts/chapter3-analysis.md）\n- [x] 第四章初稿（drafts/chapter4-strategy.md）\n- [x] 第五章初稿（drafts/chapter5-conclusion.md）\n- [x] 参考文献列表（output/references.bib）\n- [x] 图表文件\n- [x] 论文初稿（output/thesis.docx）\n\n## 检查点\n\n### 内容质量检查\n\n- [ ] 研究问题明确\n- [ ] 理论框架清晰\n- [ ] 分析逻辑严密\n- [ ] 策略针对性强\n- [ ] 结论有依据\n\n### 字数检查\n\n- [ ] 总字数符合要求\n- [ ] 各章字数均衡\n- [ ] 摘要字数达标\n\n### 格式检查\n\n- [ ] 排版符合学校规范\n- [ ] 图表清晰规范\n- [ ] 引用格式统一\n\n## 常见问题\n\n### Q1: 写作效率低怎么办？\n\n**建议**：\n1. 制定每日写作计划\n2. 使用番茄工作法\n3. 先写后改，不要边写边改\n4. 利用AI辅助生成初稿\n\n### Q2: 不知道怎么组织语言？\n\n**解决方案**：\n1. 参考同类论文的表达\n2. 使用 `/scientific-writing` Skills辅助\n3. 使用 `/awesome-ai-research-writing` Skills润色\n4. 请导师或同学帮忙审阅\n\n### Q3: 图表不专业怎么办？\n\n**解决方案**：\n1. 使用 `/academic-plotting` Skills生成\n2. 参考优秀论文的图表\n3. 使用专业工具（Python、Excel）\n4. 请导师指导修改\n\n### Q4: 查重率过高怎么办？\n\n**解决方案**：\n1. 使用 `/humanizer-zh-academic` Skills降重\n2. 理解后用自己的话表达\n3. 增加原创分析\n4. 正确使用引用\n\n## 下一步\n\n完成内容生成后，进入下一阶段：\n\n→ [Phase 5: 质量审校](./05-review.md)\n", "workflows/05-review.md": "# Phase 5: 质量审校\n\n## 目标\n\n对论文进行全面的质量审校和优化，包括：\n- 同行评审\n- 质量编辑\n- 批判性思维检查\n- AIGC降重\n- 格式规范检查\n\n## 前置条件\n\n- [ ] 已完成论文初稿（Phase 4）\n- [ ] 各章节内容完整\n- [ ] 参考文献已整理\n\n## 核心步骤\n\n### Step 1: 同行评审\n\n#### 1.1 评审维度\n\n| 维度 | 评审内容 | 权重 |\n|------|---------|------|\n| 选题价值 | 研究问题的意义和创新性 | 15% |\n| 文献综述 | 文献的全面性和批判性 | 15% |\n| 研究设计 | 方法的合理性和可行性 | 15% |\n| 数据分析 | 数据的可靠性和分析的深度 | 15% |\n| 论证逻辑 | 论点的逻辑性和说服力 | 15% |\n| 策略建议 | 建议的针对性和可操作性 | 10% |\n| 写作规范 | 语言表达和格式规范 | 10% |\n| 学术规范 | 引用和学术诚信 | 5% |\n\n#### 1.2 执行同行评审\n\n```bash\n# 使用peer-review Skills进行系统评审\n/peer-review\n```\n\n**评审流程**：\n1. 通读全文，了解整体结构\n2. 按维度逐一评审\n3. 记录问题和建议\n4. 生成评审报告\n\n#### 1.3 评审报告模板\n\n```markdown\n# 同行评审报告\n\n## 评审概览\n- 论文题目：\n- 评审日期：\n- 评审人：\n\n## 评分表\n| 维度 | 得分 | 评价 |\n|------|------|------|\n| 选题价值 | /10 | |\n| 文献综述 | /10 | |\n| 研究设计 | /10 | |\n| 数据分析 | /10 | |\n| 论证逻辑 | /10 | |\n| 策略建议 | /10 | |\n| 写作规范 | /10 | |\n| 学术规范 | /10 | |\n| **总分** | **/80** | |\n\n## 主要优点\n1.\n2.\n3.\n\n## 主要问题\n1.\n2.\n3.\n\n## 修改建议\n1.\n2.\n3.\n```\n\n### Step 2: 质量编辑\n\n#### 2.1 术语一致性检查\n\n**检查内容**：\n- 核心概念表述统一\n- 专业术语使用准确\n- 缩写首次出现有全称\n\n```bash\n# 使用quality-editor Skills进行质量检查\n/quality-editor\n```\n\n#### 2.2 引用完整性检查\n\n**检查内容**：\n- 正文引用与文献列表对应\n- 引用格式统一规范\n- 引用数量满足要求\n\n#### 2.3 逻辑连贯性检查\n\n**检查内容**：\n- 章节之间逻辑连贯\n- 段落之间过渡自然\n- 论点与论据对应\n\n### Step 3: 批判性思维检查\n\n#### 3.1 检查维度\n\n| 维度 | 检查内容 |\n|------|---------|\n| 假设检验 | 研究假设是否合理 |\n| 论证逻辑 | 推理过程是否严密 |\n| 证据质量 | 数据是否可靠充分 |\n| 替代解释 | 是否考虑其他可能 |\n| 局限性 | 是否诚实报告局限 |\n\n#### 3.2 执行批判性思维检查\n\n```bash\n# 使用scientific-critical-thinking Skills进行逻辑检查\n/scientific-critical-thinking\n```\n\n#### 3.3 常见逻辑问题\n\n```\n常见逻辑问题：\n├── 以偏概全：样本代表性不足\n├── 因果倒置：相关关系误认为因果\n├── 循环论证：用结论证明前提\n├── 诉诸权威：过度依赖单一来源\n├── 稻草人谬误：歪曲对方观点\n└── 滑坡谬误：过度推演后果\n```\n\n### Step 4: AIGC降重\n\n#### 4.1 查重前准备\n\n**了解查重规则**：\n- 知网：连续13字相似判定为重复\n- 万方：连续15字相似判定为重复\n- 维普：语义相似度检测\n\n#### 4.2 降重策略\n\n| 策略 | 方法 | 适用场景 |\n|------|------|---------|\n| 理解重写 | 理解原文后用自己的话表达 | 大段重复 |\n| 句式变换 | 主动变被动、长句变短句 | 句子重复 |\n| 同义替换 | 使用同义词替换 | 关键词重复 |\n| 结构调整 | 调整段落顺序和结构 | 结构重复 |\n| 增加原创 | 加入自己的分析和观点 | 整体重复 |\n\n#### 4.3 使用Skills降重\n\n```bash\n# 使用humanizer-zh-academic Skills进行中文降重\n/humanizer-zh-academic\n\n# 使用humanizer Skills去除AI痕迹\n/humanizer\n```\n\n#### 4.4 降重注意事项\n\n```\n降重原则：\n├── 保持原意不变\n├── 保持学术性\n├── 保持逻辑性\n├── 不要过度降重\n└── 引用部分正确标注\n```\n\n### Step 5: 格式规范检查\n\n#### 5.1 格式检查清单\n\n**页面设置**：\n- [ ] 纸张大小A4\n- [ ] 页边距符合规范\n- [ ] 页眉页脚设置正确\n- [ ] 页码格式正确\n\n**字体格式**：\n- [ ] 标题字体字号正确\n- [ ] 正文字体字号正确\n- [ ] 英文和数字字体正确\n- [ ] 图表标题格式正确\n\n**段落格式**：\n- [ ] 行距符合规范\n- [ ] 段前段后距正确\n- [ ] 首行缩进正确\n- [ ] 对齐方式正确\n\n**标题格式**：\n- [ ] 章节编号连续\n- [ ] 标题层级清晰\n- [ ] 标题样式统一\n\n#### 5.2 使用Skills检查格式\n\n```bash\n# 使用docx Skills检查和修复格式\n/docx\n\n# 使用build_thesis.py脚本生成规范文档\npython templates/build_thesis.py\n```\n\n### Step 6: 最终检查\n\n#### 6.1 内容最终检查\n\n- [ ] 摘要内容完整\n- [ ] 研究问题清晰\n- [ ] 理论框架明确\n- [ ] 分析深入透彻\n- [ ] 策略具体可行\n- [ ] 结论有依据\n\n#### 6.2 格式最终检查\n\n- [ ] 封面信息正确\n- [ ] 目录自动生成\n- [ ] 图表编号连续\n- [ ] 参考文献完整\n- [ ] 页码连续正确\n\n#### 6.3 学术规范检查\n\n- [ ] 引用格式统一\n- [ ] 无抄袭嫌疑\n- [ ] 数据来源标注\n- [ ] 致谢内容适当\n\n## Skills调用\n\n本阶段主要使用的Skills：\n\n| Skill | 用途 | 命令 |\n|-------|------|------|\n| `/peer-review` | 同行评审 | `/peer-review` |\n| `/quality-editor` | 质量编辑 | `/quality-editor` |\n| `/scientific-critical-thinking` | 批判性思维检查 | `/scientific-critical-thinking` |\n| `/humanizer-zh-academic` | 中文降重 | `/humanizer-zh-academic` |\n| `/humanizer` | 去AI化润色 | `/humanizer` |\n| `/awesome-ai-research-writing` | 学术润色 | `/awesome-ai-research-writing` |\n| `/docx` | 格式检查 | `/docx` |\n\n## 输出物\n\n- [x] 同行评审报告（reviews/peer-review-report.md）\n- [x] 质量编辑报告（reviews/quality-editor-report.md）\n- [x] 批判性思维报告（reviews/critical-thinking-report.md）\n- [x] 修改记录\n- [x] 论文修改稿\n\n## 检查点\n\n### 评审质量检查\n\n- [ ] 同行评审已完成\n- [ ] 评审意见已采纳\n- [ ] 重大问题已修改\n- [ ] 导师意见已整合\n\n### 查重检查\n\n- [ ] 初次查重率≤20%\n- [ ] 降重后查重率≤15%\n- [ ] 引用部分正确标注\n- [ ] 无大段抄袭\n\n### 格式检查\n\n- [ ] 格式符合学校规范\n- [ ] 图表清晰规范\n- [ ] 参考文献完整\n- [ ] 目录正确\n\n## 常见问题\n\n### Q1: 查重率降不下来怎么办？\n\n**解决方案**：\n1. 使用 `/humanizer-zh-academic` Skills辅助降重\n2. 理解原文后用自己的话重写\n3. 增加原创分析和数据\n4. 正确使用引用标注\n5. 请导师指导修改\n\n### Q2: 评审意见太多改不完怎么办？\n\n**建议**：\n1. 按优先级排序\n2. 先改重大问题\n3. 与导师沟通确认\n4. 分阶段修改完善\n\n### Q3: 格式总是不统一怎么办？\n\n**解决方案**：\n1. 使用Word样式功能统一格式\n2. 使用 `/docx` Skills自动修复\n3. 使用 `build_thesis.py` 脚本生成\n4. 最后统一检查一遍\n\n### Q4: 不确定内容是否合适怎么办？\n\n**建议**：\n1. 使用 `/scientific-critical-thinking` Skills检查\n2. 请导师审阅指导\n3. 请同学帮忙阅读\n4. 多次修改完善\n\n## 下一步\n\n完成质量审校后，进入下一阶段：\n\n→ [Phase 6: 答辩准备](./06-defense.md)\n", "workflows/06-defense.md": "# Phase 6: 答辩准备\n\n## 目标\n\n完成MBA论文答辩的全面准备，包括：\n- 制作答辩PPT\n- 准备演讲稿\n- 模拟Q&A练习\n- 最终检查和准备\n\n## 前置条件\n\n- [ ] 已完成论文终稿（Phase 5）\n- [ ] 论文已通过查重\n- [ ] 已获得答辩资格\n\n## 核心步骤\n\n### Step 1: 制作答辩PPT\n\n#### 1.1 PPT结构设计\n\n```\n答辩PPT结构（20页，15分钟）：\n\n1. 封面（1页）\n   - 论文题目\n   - 作者信息\n   - 导师信息\n   - 学校/学院\n   - 答辩日期\n\n2. 目录（1页）\n   - 研究背景与问题\n   - 研究方法与数据\n   - 核心发现\n   - 策略方案\n   - 研究结论\n\n3. 研究背景与问题（3页）\n   - 宏观背景（行业/政策）\n   - 微观背景（企业现状）\n   - 研究问题与意义\n\n4. 文献综述与理论框架（2页）\n   - 核心理论概述\n   - 研究框架图\n\n5. 研究方法与数据（2页）\n   - 研究设计与方法\n   - 数据收集与样本\n\n6. 核心发现（5页）\n   - 现状分析结果\n   - 问题诊断\n   - 数据图表展示\n   - 关键发现1\n   - 关键发现2\n\n7. 策略方案（4页）\n   - 优化框架设计\n   - 核心策略1\n   - 核心策略2\n   - 实施路径\n\n8. 研究结论（2页）\n   - 主要结论\n   - 研究贡献\n\n9. 局限性与展望（1页）\n   - 研究局限\n   - 未来方向\n\n10. 致谢（1页）\n    - 感谢导师\n    - 感谢评委\n```\n\n#### 1.2 PPT设计原则\n\n| 原则 | 说明 |\n|------|------|\n| 简洁明了 | 每页文字不超过6行 |\n| 重点突出 | 关键数据用醒目颜色 |\n| 图表为主 | 用图表代替大段文字 |\n| 逻辑清晰 | 页面之间过渡自然 |\n| 配色统一 | 使用学校主题色 |\n\n#### 1.3 使用Skills制作PPT\n\n```bash\n# 使用pptx Skills制作答辩PPT\n/pptx\n\n# 使用paper-slide-deck Skills生成幻灯片\n/paper-slide-deck\n\n# 使用scientific-slides Skills生成学术幻灯片\n/scientific-slides\n```\n\n### Step 2: 准备演讲稿\n\n#### 2.1 演讲时间分配\n\n```\n时间分配（15分钟）：\n├── 开场白：1分钟\n├── 研究背景与问题：2分钟\n├── 文献综述与理论框架：1.5分钟\n├── 研究方法与数据：1.5分钟\n├── 核心发现：4分钟\n├── 策略方案：3分钟\n├── 研究结论：1.5分钟\n└── 结束语：0.5分钟\n```\n\n#### 2.2 演讲稿模板\n\n```markdown\n# 答辩演讲稿\n\n## 开场白（1分钟）\n各位评委老师，下午好！我是[姓名]，我的论文题目是[论文题目]，\n导师是[导师姓名]教授。下面我将从研究背景、研究方法、核心发现、\n策略方案和研究结论五个方面进行汇报。\n\n## 研究背景与问题（2分钟）\n[介绍宏观背景、行业背景、微观背景]\n[引出研究问题和研究意义]\n\n## 文献综述与理论框架（1.5分钟）\n[简述核心理论]\n[展示研究框架图]\n\n## 研究方法与数据（1.5分钟）\n[说明研究设计]\n[介绍数据收集方法和样本]\n\n## 核心发现（4分钟）\n[展示现状分析结果]\n[呈现关键数据图表]\n[总结核心发现]\n\n## 策略方案（3分钟）\n[展示优化框架]\n[介绍核心策略]\n[说明实施路径]\n\n## 研究结论（1.5分钟）\n[总结主要结论]\n[阐述研究贡献]\n[说明研究局限]\n\n## 结束语（0.5分钟）\n以上是我的汇报，请各位评委老师批评指正，谢谢！\n```\n\n#### 2.3 演讲技巧\n\n```\n开场技巧：\n├── 简洁介绍自己和论文\n├── 说明研究的核心问题\n└── 预告演讲结构\n\n演讲技巧：\n├── 语速适中，不要太快\n├── 与评委保持眼神交流\n├── 重点内容适当停顿\n├── 使用手势辅助表达\n└── 控制好时间节奏\n\n结尾技巧：\n├── 总结核心结论\n├── 感谢评委提问\n└── 表达对研究的热爱\n```\n\n### Step 3: 准备Q&A\n\n#### 3.1 常见问题分类\n\n| 类别 | 问题示例 | 准备要点 |\n|------|---------|---------|\n| 澄清类 | \"请解释XX概念\" | 熟悉核心概念 |\n| 方法论 | \"为什么选择这种方法\" | 说明选择理由 |\n| 实践价值 | \"方案如何落地\" | 准备实施细节 |\n| 理论贡献 | \"有什么创新点\" | 明确创新点 |\n| 局限性 | \"研究有什么不足\" | 诚实承认局限 |\n| 细节追问 | \"数据来源是什么\" | 熟悉论文细节 |\n\n#### 3.2 使用Skills准备Q&A\n\n```bash\n# 使用dissertation-defense Skills进行模拟答辩\n/dissertation-defense\n\n# 生成模拟问答题库\n# AI将根据论文内容自动生成常见问题和参考答案\n```\n\n#### 3.3 回答技巧\n\n```\n回答问题技巧：\n├── 认真听完问题再回答\n├── 不理解可以请评委重复\n├── 回答要有条理（第一、第二...）\n├── 不知道的诚实说明\n├── 不要与评委争论\n└── 控制回答时间（1-2分钟）\n```\n\n### Step 4: 模拟答辩\n\n#### 4.1 模拟答辩安排\n\n```\n模拟答辩计划：\n├── 第一次（答辩前3周）\n│   ├── 目的：熟悉流程，发现问题\n│   ├── 参与：导师、同学\n│   └── 重点：内容完整性\n├── 第二次（答辩前2周）\n│   ├── 目的：改进问题，优化表达\n│   ├── 参与：导师、同学\n│   └── 重点：时间控制\n└── 第三次（答辩前1周）\n    ├── 目的：最终完善，建立信心\n    ├── 参与：导师、同学\n    └── 重点：整体流畅\n```\n\n#### 4.2 模拟答辩检查清单\n\n**PPT检查**：\n- [ ] PPT页数合适（15-20页）\n- [ ] 内容逻辑清晰\n- [ ] 图表清晰可读\n- [ ] 动画简洁\n\n**演讲检查**：\n- [ ] 时间控制在15分钟内\n- [ ] 语速适中\n- [ ] 表达清晰\n- [ ] 重点突出\n\n**Q&A检查**：\n- [ ] 常见问题已准备\n- [ ] 回答有条理\n- [ ] 态度谦虚诚恳\n- [ ] 不懂的问题诚实说明\n\n### Step 5: 最终准备\n\n#### 5.1 答辩物品清单\n\n**必备物品**：\n- [ ] 论文打印稿（至少3份）\n- [ ] PPT电子版（U盘+云端备份）\n- [ ] 学生证/身份证\n- [ ] 答辩记录本\n- [ ] 笔\n\n**建议物品**：\n- [ ] 计算器\n- [ ] 论文电子版\n- [ ] 参考资料\n- [ ] 水杯\n- [ ] 纸巾\n\n#### 5.2 答辩前检查\n\n**技术检查**：\n- [ ] 测试PPT播放\n- [ ] 检查电脑连接\n- [ ] 准备备用方案\n- [ ] 确认网络连接\n\n**个人准备**：\n- [ ] 着装得体\n- [ ] 充足睡眠\n- [ ] 提前到场\n- [ ] 调整心态\n\n#### 5.3 答辩流程\n\n```\n答辩流程：\n├── 签到候场（提前30分钟）\n├── 自我介绍（1分钟）\n├── 论文陈述（15分钟）\n├── 评委提问（10-15分钟）\n├── 回答问题（10-15分钟）\n├── 评委评议（场外等待）\n└── 宣布结果\n```\n\n## Skills调用\n\n本阶段主要使用的Skills：\n\n| Skill | 用途 | 命令 |\n|-------|------|------|\n| `/pptx` | 制作答辩PPT | `/pptx` |\n| `/paper-slide-deck` | 生成幻灯片 | `/paper-slide-deck` |\n| `/scientific-slides` | 学术幻灯片 | `/scientific-slides` |\n| `/dissertation-defense` | 答辩模拟 | `/dissertation-defense` |\n| `/awesome-ai-research-writing` | 演讲稿润色 | `/awesome-ai-research-writing` |\n\n## 输出物\n\n- [x] 答辩PPT（output/defense.pptx）\n- [x] 演讲稿\n- [x] Q&A题库\n- [x] 模拟答辩记录\n- [x] 答辩准备清单\n\n## 检查点\n\n### PPT检查\n\n- [ ] PPT结构完整\n- [ ] 内容重点突出\n- [ ] 图表清晰规范\n- [ ] 时间控制合适\n\n### 演讲检查\n\n- [ ] 演讲稿已准备\n- [ ] 时间控制在15分钟\n- [ ] 表达清晰流畅\n- [ ] 重点突出\n\n### Q&A检查\n\n- [ ] 常见问题已准备\n- [ ] 模拟练习已完成\n- [ ] 回答有条理\n- [ ] 态度谦虚诚恳\n\n### 物品检查\n\n- [ ] 论文打印稿已准备\n- [ ] PPT已备份\n- [ ] 证件已准备\n- [ ] 着装已准备\n\n## 常见问题\n\n### Q1: 答辩紧张怎么办？\n\n**建议**：\n1. 充分准备，熟悉内容\n2. 多次模拟练习\n3. 提前到场熟悉环境\n4. 深呼吸放松\n5. 把答辩当作交流\n\n### Q2: 时间控制不好怎么办？\n\n**解决方案**：\n1. 多次练习计时\n2. 准备删减方案\n3. 重点内容优先\n4. 使用计时器提醒\n5. 请同学帮忙计时\n\n### Q3: 问题不会回答怎么办？\n\n**建议**：\n1. 认真听完问题\n2. 不理解可以请重复\n3. 诚实说明不确定\n4. 可以从相关角度回答\n5. 不要与评委争论\n\n### Q4: PPT播放出问题怎么办？\n\n**解决方案**：\n1. 提前测试设备\n2. 准备多种格式备份\n3. 准备纸质版备用\n4. 保持冷静处理\n5. 请工作人员协助\n\n## 答辩后工作\n\n### 论文修改\n\n- [ ] 根据答辩意见修改论文\n- [ ] 提交修改说明\n- [ ] 完成最终版本\n- [ ] 提交归档\n\n### 材料提交\n\n- [ ] 论文终稿\n- [ ] 答辩记录\n- [ ] 修改说明\n- [ ] 电子版上传\n\n### 后续事项\n\n- [ ] 感谢导师和帮助过的人\n- [ ] 整理研究资料\n- [ ] 总结研究经验\n- [ ] 规划下一步发展\n", "skills/skills-guide.md": "# Skills使用指南\n\n## 概述\n\n本指南详细介绍MBA论文写作过程中可使用的Claude Code Skills，帮助你高效完成论文写作。\n\n## Skills分类\n\n### 核心Skills（高频使用）\n\n这些Skills在论文写作过程中会频繁使用：\n\n| Skill | 用途 | 使用场景 |\n|-------|------|---------|\n| `markitdown` | 格式转换 | 文献PDF转Markdown |\n| `pdf` | PDF读取 | 提取文献内容 |\n| `docx` | 生成Word | 论文终稿生成 |\n| `peer-review` | 同行评审 | 质量审校 |\n| `quality-editor` | 质量编辑 | 术语一致性、引用完整性 |\n| `scientific-critical-thinking` | 批判性思维 | 逻辑检查 |\n| `awesome-ai-research-writing` | 学术写作 | 润色、翻译 |\n| `humanizer` | 去AI化 | 语言自然化 |\n| `humanizer-zh-academic` | 中文降重 | 知网查重 |\n\n### 辅助Skills（按需使用）\n\n这些Skills在特定场景下使用：\n\n| Skill | 用途 | 使用场景 |\n|-------|------|---------|\n| `paper-lookup` | 文献检索 | DOI验证、元数据 |\n| `research-lookup` | 研究扩展 | 关键词扩展 |\n| `citation-management` | 引用管理 | BibTeX格式化 |\n| `literature-review` | 文献综述 | 综述撰写 |\n| `scientific-writing` | 学术写作 | 正文段落 |\n| `scientific-schematics` | 框架图 | 研究框架图 |\n| `academic-plotting` | 统计图表 | 数据可视化 |\n| `pptx` | PPT制作 | 答辩幻灯片 |\n| `dissertation-defense` | 答辩准备 | Q&A模拟 |\n\n---\n\n## 核心Skills详解\n\n### 1. markitdown - 格式转换\n\n**用途**：将各种格式的文件转换为Markdown\n\n**支持格式**：\n- PDF、DOCX、PPTX、XLSX\n- 图片（OCR识别）\n- HTML、CSV、JSON\n- 音频（转录）\n\n**使用方法**：\n\n```bash\n# 转换PDF文献为Markdown\n/markitdown \"path/to/paper.pdf\"\n\n# 转换Word文档\n/markitdown \"path/to/document.docx\"\n```\n\n**使用场景**：\n- 将下载的PDF文献转换为可编辑格式\n- 将已有资料转换为Markdown便于整合\n- 提取图片中的文字内容\n\n---\n\n### 2. pdf - PDF读取\n\n**用途**：直接读取PDF文件内容\n\n**使用方法**：\n\n```bash\n# 读取PDF文献\n/pdf \"path/to/paper.pdf\"\n\n# 提取特定页面\n/pdf \"path/to/paper.pdf\" --pages 1-5\n```\n\n**使用场景**：\n- 快速阅读文献摘要\n- 提取关键数据和图表\n- 获取引用信息\n\n---\n\n### 3. docx - 生成Word文档\n\n**用途**：创建和编辑Word文档\n\n**使用方法**：\n\n```bash\n# 生成论文Word文档\n/docx\n\n# 使用build_thesis.py脚本\npython templates/build_thesis.py\n```\n\n**功能特点**：\n- 自动应用学校格式规范\n- 生成目录和页眉页脚\n- 插入图表和公式\n- 管理参考文献\n\n---\n\n### 4. peer-review - 同行评审\n\n**用途**：模拟同行评审，提供专业评审意见\n\n**评审维度**：\n- 选题价值\n- 文献综述\n- 研究设计\n- 数据分析\n- 论证逻辑\n- 策略建议\n- 写作规范\n- 学术规范\n\n**使用方法**：\n\n```bash\n# 对论文进行同行评审\n/peer-review\n\n# 对特定章节评审\n/peer-review --chapter 3\n```\n\n**输出**：\n- 评审报告（reviews/peer-review-report.md）\n- 评分表\n- 修改建议\n\n---\n\n### 5. quality-editor - 质量编辑\n\n**用途**：检查和修正论文质量问题\n\n**检查内容**：\n- 术语一致性\n- 引用完整性\n- 格式规范性\n- 逻辑连贯性\n\n**使用方法**：\n\n```bash\n# 进行质量编辑\n/quality-editor\n\n# 只检查术语一致性\n/quality-editor --check terminology\n```\n\n**输出**：\n- 质量编辑报告（reviews/quality-editor-report.md）\n- 问题清单\n- 修改建议\n\n---\n\n### 6. scientific-critical-thinking - 批判性思维\n\n**用途**：检查论文的逻辑性和批判性\n\n**检查维度**：\n- 假设检验\n- 论证逻辑\n- 证据质量\n- 替代解释\n- 局限性\n\n**使用方法**：\n\n```bash\n# 进行批判性思维检查\n/scientific-critical-thinking\n\n# 检查特定论证\n/scientific-critical-thinking --argument \"论证内容\"\n```\n\n**输出**：\n- 批判性思维报告（reviews/critical-thinking-report.md）\n- 逻辑问题清单\n- 改进建议\n\n---\n\n### 7. awesome-ai-research-writing - 学术写作\n\n**用途**：辅助学术写作，提供润色和翻译\n\n**功能**：\n- 学术润色\n- 中英互译\n- 语言优化\n- 逻辑梳理\n\n**使用方法**：\n\n```bash\n# 润色学术段落\n/awesome-ai-research-writing \"需要润色的内容\"\n\n# 中译英\n/awesome-ai-research-writing --translate \"中文内容\"\n\n# 英译中\n/awesome-ai-research-writing --translate \"English content\"\n```\n\n---\n\n### 8. humanizer - 去AI化\n\n**用途**：去除AI生成的痕迹，使语言更自然\n\n**适用场景**：\n- AI辅助生成的内容\n- 机器翻译的内容\n- 模板化的内容\n\n**使用方法**：\n\n```bash\n# 去AI化处理\n/humanizer \"需要处理的内容\"\n\n# 处理整个文件\n/humanizer --file \"path/to/file.md\"\n```\n\n---\n\n### 9. humanizer-zh-academic - 中文降重\n\n**用途**：针对知网查重的中文降重\n\n**特点**：\n- 保持原意不变\n- 保持学术性\n- 降低重复率\n- 符合学术规范\n\n**使用方法**：\n\n```bash\n# 中文降重\n/humanizer-zh-academic \"需要降重的内容\"\n\n# 处理整个文件\n/humanizer-zh-academic --file \"path/to/file.md\"\n```\n\n**使用建议**：\n- 先查重，再针对性降重\n- 理解后用自己的话表达\n- 引用部分正确标注\n\n---\n\n## 辅助Skills详解\n\n### 10. paper-lookup - 文献检索\n\n**用途**：检索学术文献，获取元数据\n\n**支持数据库**：\n- PubMed\n- arXiv\n- Semantic Scholar\n- Google Scholar\n\n**使用方法**：\n\n```bash\n# 按关键词检索\n/paper-lookup \"关键词\"\n\n# 按DOI检索\n/paper-lookup --doi \"10.xxxx/xxxxx\"\n\n# 按标题检索\n/paper-lookup --title \"论文标题\"\n```\n\n---\n\n### 11. research-lookup - 研究扩展\n\n**用途**：扩展研究信息，获取背景资料\n\n**使用方法**：\n\n```bash\n# 查找研究背景\n/research-lookup \"研究主题\"\n\n# 查找最新进展\n/research-lookup --recent \"研究主题\"\n```\n\n---\n\n### 12. citation-management - 引用管理\n\n**用途**：管理参考文献，格式化引用\n\n**功能**：\n- 生成BibTeX条目\n- 格式化引用\n- 验证引用信息\n- 管理文献库\n\n**使用方法**：\n\n```bash\n# 生成BibTeX\n/citation-management --doi \"10.xxxx/xxxxx\"\n\n# 格式化引用列表\n/citation-management --format \"GB/T 7714\"\n```\n\n---\n\n### 13. literature-review - 文献综述\n\n**用途**：辅助撰写文献综述\n\n**使用方法**：\n\n```bash\n# 生成文献综述框架\n/literature-review\n\n# 基于特定文献生成综述\n/literature-review --sources \"文献列表\"\n```\n\n---\n\n### 14. scientific-writing - 学术写作\n\n**用途**：辅助撰写学术正文\n\n**功能**：\n- 段落写作\n- 论证构建\n- 语言优化\n- 逻辑梳理\n\n**使用方法**：\n\n```bash\n# 生成学术段落\n/scientific-writing --topic \"段落主题\"\n\n# 优化现有段落\n/scientific-writing --improve \"段落内容\"\n```\n\n---\n\n### 15. scientific-schematics - 框架图\n\n**用途**：生成研究框架图、流程图\n\n**支持类型**：\n- 流程图\n- 概念图\n- 架构图\n- 模型图\n\n**使用方法**：\n\n```bash\n# 生成研究框架图\n/scientific-schematics\n\n# 生成特定类型图\n/scientific-schematics --type flowchart\n```\n\n---\n\n### 16. academic-plotting - 统计图表\n\n**用途**：生成学术统计图表\n\n**支持图表类型**：\n- 柱状图\n- 折线图\n- 饼图\n- 散点图\n- 箱线图\n\n**使用方法**：\n\n```bash\n# 从数据生成图表\n/academic-plotting --data \"data.csv\"\n\n# 生成特定类型图表\n/academic-plotting --type bar --data \"data.csv\"\n```\n\n---\n\n### 17. pptx - PPT制作\n\n**用途**：制作答辩PPT\n\n**使用方法**：\n\n```bash\n# 生成答辩PPT\n/pptx\n\n# 基于大纲生成\n/pptx --outline \"templates/defense-ppt.md\"\n```\n\n---\n\n### 18. dissertation-defense - 答辩准备\n\n**用途**：准备答辩，模拟Q&A\n\n**功能**：\n- 生成Q&A题库\n- 模拟答辩练习\n- 提供应答策略\n- 评估准备情况\n\n**使用方法**：\n\n```bash\n# 生成Q&A题库\n/dissertation-defense\n\n# 模拟答辩练习\n/dissertation-defense --mock\n```\n\n---\n\n## Skills使用流程\n\n### 按论文阶段使用\n\n```\nPhase 0: 项目初始化\n├── /markitdown（转换已有资料）\n└── /pdf（读取PDF文档）\n\nPhase 1: 文献检索\n├── /paper-lookup（检索文献）\n├── /research-lookup（扩展研究）\n├── /citation-management（管理引用）\n└── /literature-review（撰写综述）\n\nPhase 2: 框架设计\n├── /scientific-schematics（绘制框架图）\n└── /scientific-writing（撰写第一章）\n\nPhase 3: 数据收集\n├── /xlsx（处理问卷数据）\n└── /scientific-writing（撰写方法部分）\n\nPhase 4: 内容生成\n├── /scientific-writing（撰写正文）\n├── /awesome-ai-research-writing（润色翻译）\n├── /academic-plotting（生成图表）\n└── /docx（生成Word）\n\nPhase 5: 质量审校\n├── /peer-review（同行评审）\n├── /quality-editor（质量编辑）\n├── /scientific-critical-thinking（逻辑检查）\n├── /humanizer-zh-academic（中文降重）\n└── /humanizer（去AI化）\n\nPhase 6: 答辩准备\n├── /pptx（制作PPT）\n└── /dissertation-defense（答辩模拟）\n```\n\n---\n\n## 使用注意事项\n\n### 1. Skills调用顺序\n\n- 先读取内容，再进行处理\n- 先生成框架，再填充内容\n- 先完成初稿，再进行润色\n\n### 2. 输出管理\n\n- 每次调用后保存输出\n- 建立版本管理\n- 记录修改历史\n\n### 3. 质量控制\n\n- AI生成内容需要人工审核\n- 重要决策请导师确认\n- 保持学术诚信\n\n### 4. 常见问题\n\n**Q: Skills调用失败怎么办？**\nA: 检查输入格式，确保文件路径正确，尝试简化输入\n\n**Q: 生成内容不符合要求怎么办？**\nA: 提供更详细的指令，给出示例，多次迭代优化\n\n**Q: 如何提高生成质量？**\nA: 提供更多上下文，明确要求，使用参考示例\n", "skills/skills-quickref.md": "# Skills速查表\n\n## 快速查找\n\n### 按用途分类\n\n#### 📚 文献相关\n\n| 命令 | 用途 | 示例 |\n|------|------|------|\n| `/paper-lookup` | 检索文献 | `/paper-lookup \"STP理论\"` |\n| `/research-lookup` | 扩展研究 | `/research-lookup \"你的研究主题\"` |\n| `/citation-management` | 引用管理 | `/citation-management --doi \"10.xxx\"` |\n| `/literature-review` | 文献综述 | `/literature-review` |\n| `/pdf` | 读取PDF | `/pdf \"paper.pdf\"` |\n| `/markitdown` | 格式转换 | `/markitdown \"paper.pdf\"` |\n\n#### ✍️ 写作相关\n\n| 命令 | 用途 | 示例 |\n|------|------|------|\n| `/scientific-writing` | 学术写作 | `/scientific-writing --topic \"研究背景\"` |\n| `/awesome-ai-research-writing` | 润色翻译 | `/awesome-ai-research-writing \"内容\"` |\n| `/humanizer` | 去AI化 | `/humanizer \"内容\"` |\n| `/humanizer-zh-academic` | 中文降重 | `/humanizer-zh-academic \"内容\"` |\n\n#### 📊 图表相关\n\n| 命令 | 用途 | 示例 |\n|------|------|------|\n| `/scientific-schematics` | 框架图 | `/scientific-schematics` |\n| `/academic-plotting` | 统计图 | `/academic-plotting --data \"data.csv\"` |\n\n#### 🔍 审校相关\n\n| 命令 | 用途 | 示例 |\n|------|------|------|\n| `/peer-review` | 同行评审 | `/peer-review` |\n| `/quality-editor` | 质量编辑 | `/quality-editor` |\n| `/scientific-critical-thinking` | 逻辑检查 | `/scientific-critical-thinking` |\n\n#### 📄 文档生成\n\n| 命令 | 用途 | 示例 |\n|------|------|------|\n| `/docx` | 生成Word | `/docx` |\n| `/pptx` | 生成PPT | `/pptx` |\n| `/xlsx` | 处理Excel | `/xlsx` |\n\n#### 🎓 答辩相关\n\n| 命令 | 用途 | 示例 |\n|------|------|------|\n| `/dissertation-defense` | 答辩准备 | `/dissertation-defense` |\n\n---\n\n## 按论文阶段使用\n\n### Phase 0: 项目初始化\n\n```bash\n/markitdown \"已有资料.pdf\"      # 转换已有资料\n/pdf \"开题报告.pdf\"              # 读取开题报告\n```\n\n### Phase 1: 文献检索\n\n```bash\n/paper-lookup \"关键词\"           # 检索文献\n/research-lookup \"研究主题\"      # 扩展研究\n/citation-management --doi \"DOI\" # 管理引用\n/literature-review               # 撰写综述\n```\n\n### Phase 2: 框架设计\n\n```bash\n/scientific-schematics           # 绘制框架图\n/scientific-writing --topic \"绪论\" # 撰写第一章\n```\n\n### Phase 3: 数据收集\n\n```bash\n/xlsx                            # 处理问卷数据\n/scientific-writing --topic \"研究方法\" # 撰写方法\n```\n\n### Phase 4: 内容生成\n\n```bash\n/scientific-writing              # 撰写正文\n/awesome-ai-research-writing     # 润色翻译\n/academic-plotting --data \"data.csv\" # 生成图表\n/docx                            # 生成Word\n```\n\n### Phase 5: 质量审校\n\n```bash\n/peer-review                     # 同行评审\n/quality-editor                  # 质量编辑\n/scientific-critical-thinking    # 逻辑检查\n/humanizer-zh-academic           # 中文降重\n/humanizer                       # 去AI化\n```\n\n### Phase 6: 答辩准备\n\n```bash\n/pptx                            # 制作PPT\n/dissertation-defense            # 答辩模拟\n```\n\n---\n\n## 常用场景速查\n\n### 场景1：阅读文献\n\n```bash\n# 步骤1：下载PDF\n# 步骤2：读取内容\n/pdf \"paper.pdf\"\n\n# 或转换为Markdown\n/markitdown \"paper.pdf\"\n\n# 步骤3：获取元数据\n/paper-lookup --doi \"10.xxx\"\n```\n\n### 场景2：撰写文献综述\n\n```bash\n# 步骤1：检索相关文献\n/paper-lookup \"关键词\"\n/research-lookup \"研究主题\"\n\n# 步骤2：管理引用\n/citation-management --format \"GB/T 7714\"\n\n# 步骤3：撰写综述\n/literature-review\n\n# 步骤4：润色\n/awesome-ai-research-writing\n```\n\n### 场景3：撰写数据分析章节\n\n```bash\n# 步骤1：处理数据\n/xlsx --data \"questionnaire.xlsx\"\n\n# 步骤2：生成图表\n/academic-plotting --data \"data.csv\" --type bar\n\n# 步骤3：撰写分析\n/scientific-writing --topic \"数据分析\"\n\n# 步骤4：润色\n/awesome-ai-research-writing\n```\n\n### 场景4：论文降重\n\n```bash\n# 步骤1：查重（使用学校系统）\n# 步骤2：识别重复部分\n\n# 步骤3：降重处理\n/humanizer-zh-academic \"重复内容\"\n\n# 步骤4：去AI化\n/humanizer \"处理后内容\"\n\n# 步骤5：再次查重确认\n```\n\n### 场景5：制作答辩PPT\n\n```bash\n# 步骤1：准备大纲\ncat templates/defense-ppt.md\n\n# 步骤2：生成PPT\n/pptx --outline \"templates/defense-ppt.md\"\n\n# 步骤3：准备Q&A\n/dissertation-defense\n\n# 步骤4：模拟练习\n/dissertation-defense --mock\n```\n\n---\n\n## 参数速查\n\n### paper-lookup\n\n```bash\n/paper-lookup \"关键词\"           # 按关键词检索\n/paper-lookup --doi \"DOI\"        # 按DOI检索\n/paper-lookup --title \"标题\"     # 按标题检索\n/paper-lookup --author \"作者\"    # 按作者检索\n```\n\n### scientific-writing\n\n```bash\n/scientific-writing --topic \"主题\"   # 指定主题\n/scientific-writing --improve \"内容\" # 改进现有内容\n/scientific-writing --outline        # 生成大纲\n```\n\n### awesome-ai-research-writing\n\n```bash\n/awesome-ai-research-writing \"内容\"           # 润色\n/awesome-ai-research-writing --translate \"内容\" # 翻译\n/awesome-ai-research-writing --shorten \"内容\"  # 缩短\n/awesome-ai-research-writing --expand \"内容\"   # 扩展\n```\n\n### academic-plotting\n\n```bash\n/academic-plotting --data \"data.csv\"           # 自动选择图表\n/academic-plotting --data \"data.csv\" --type bar    # 柱状图\n/academic-plotting --data \"data.csv\" --type line   # 折线图\n/academic-plotting --data \"data.csv\" --type pie    # 饼图\n/academic-plotting --data \"data.csv\" --type scatter # 散点图\n```\n\n### citation-management\n\n```bash\n/citation-management --doi \"DOI\"              # 获取引用\n/citation-management --format \"GB/T 7714\"     # 格式化\n/citation-management --bib \"references.bib\"   # 管理BibTeX\n```\n\n---\n\n## 输出文件位置\n\n| Skills | 输出位置 |\n|--------|---------|\n| `/peer-review` | `reviews/peer-review-report.md` |\n| `/quality-editor` | `reviews/quality-editor-report.md` |\n| `/scientific-critical-thinking` | `reviews/critical-thinking-report.md` |\n| `/docx` | `output/thesis.docx` |\n| `/pptx` | `output/defense.pptx` |\n| `/citation-management` | `output/references.bib` |\n| `/academic-plotting` | `output/figures/` |\n\n---\n\n## 注意事项\n\n### 使用原则\n\n1. **先读后写**：先读取内容，再进行处理\n2. **先框架后细节**：先生成框架，再填充内容\n3. **先初稿后润色**：先完成初稿，再进行优化\n4. **人工审核**：AI生成内容需要人工审核\n\n### 常见问题\n\n| 问题 | 解决方案 |\n|------|---------|\n| Skills调用失败 | 检查输入格式，简化输入 |\n| 生成内容不符 | 提供更详细指令，给出示例 |\n| 质量不满意 | 多次迭代，提供反馈 |\n| 格式不正确 | 使用模板，参考示例 |\n\n### 效率提升技巧\n\n1. **批量处理**：相似内容一起处理\n2. **模板复用**：建立常用模板\n3. **版本管理**：保存中间版本\n4. **及时保存**：每次处理后保存结果\n", "templates/thesis-outline.md": "# MBA论文大纲模板\n\n## 使用说明\n\n本工具提供MBA论文的标准结构，根据你的研究主题和学校要求进行调整。\n\n---\n\n## 五章制结构（标准）\n\n### 第1章 绪论\n\n```\n1.1 研究背景及研究意义\n├── 1.1.1 研究背景\n│   ├── 宏观背景（政策、经济环境）\n│   ├── 行业背景（市场、竞争格局）\n│   └── 微观背景（企业现状、问题）\n├── 1.1.2 研究意义\n│   ├── 理论意义\n│   └── 实践意义\n└── 1.1.3 研究目的\n\n1.2 研究内容与研究方法\n├── 1.2.1 研究内容与框架\n├── 1.2.2 研究方法\n└── 1.2.3 技术路线\n\n1.3 研究创新点\n├── 1.3.1 理论创新\n└── 1.3.2 实践创新\n```\n\n**字数建议**：3000-5000字\n\n---\n\n### 第2章 相关理论与文献综述\n\n```\n2.1 核心概念界定\n├── 2.1.1 [概念1]的定义\n├── 2.1.2 [概念2]的定义\n└── 2.1.3 [概念3]的定义\n\n2.2 理论基础\n├── 2.2.1 [理论1]的内涵与发展\n├── 2.2.2 [理论2]的核心观点\n└── 2.2.3 [理论3]的应用演进\n\n2.3 国内外研究现状\n├── 2.3.1 [主题1]研究综述\n│   ├── 国外研究现状\n│   └── 国内研究现状\n├── 2.3.2 [主题2]研究综述\n│   ├── 国外研究现状\n│   └── 国内研究现状\n└── 2.3.3 [主题3]研究综述\n    ├── 国外研究现状\n    └── 国内研究现状\n\n2.4 文献评述\n├── 2.4.1 现有研究的贡献\n├── 2.4.2 现有研究的不足\n└── 2.4.3 本研究的切入点\n```\n\n**字数建议**：5000-8000字\n\n---\n\n### 第3章 [研究对象]现状分析\n\n```\n3.1 [研究对象]概况\n├── 3.1.1 基本情况\n├── 3.1.2 组织架构\n└── 3.1.3 业务现状\n\n3.2 外部环境分析\n├── 3.2.1 PEST宏观环境分析\n│   ├── 政治与政策环境\n│   ├── 经济环境\n│   ├── 社会文化环境\n│   └── 技术环境\n├── 3.2.2 行业竞争分析\n│   ├── 供应商议价能力\n│   ├── 购买者议价能力\n│   ├── 新进入者威胁\n│   ├── 替代品威胁\n│   └── 行业内竞争\n└── 3.2.3 市场环境分析\n\n3.3 内部环境分析\n├── 3.3.1 资源能力分析\n├── 3.3.2 SWOT综合分析\n│   ├── 优势（Strengths）\n│   ├── 劣势（Weaknesses）\n│   ├── 机会（Opportunities）\n│   └── 威胁（Threats）\n└── 3.3.3 现存问题识别\n\n3.4 调研数据分析\n├── 3.4.1 问卷调查结果\n│   ├── 样本描述性统计\n│   ├── 信效度检验\n│   └── 数据分析结果\n├── 3.4.2 访谈核心发现\n│   ├── 访谈对象信息\n│   ├── 主题编码结果\n│   └── 核心发现\n└── 3.4.3 问题诊断总结\n```\n\n**字数建议**：8000-10000字\n\n---\n\n### 第4章 [研究对象]优化策略\n\n```\n4.1 优化目标与原则\n├── 4.1.1 优化目标\n└── 4.1.2 优化原则\n\n4.2 [策略1]设计\n├── 4.2.1 策略框架\n├── 4.2.2 具体措施\n│   ├── 措施1\n│   ├── 措施2\n│   └── 措施3\n└── 4.2.3 实施路径\n\n4.3 [策略2]设计\n├── 4.3.1 策略框架\n├── 4.3.2 具体措施\n│   ├── 措施1\n│   ├── 措施2\n│   └── 措施3\n└── 4.3.3 实施路径\n\n4.4 [策略3]设计\n├── 4.4.1 策略框架\n├── 4.4.2 具体措施\n│   ├── 措施1\n│   ├── 措施2\n│   └── 措施3\n└── 4.4.3 实施路径\n\n4.5 实施保障\n├── 4.5.1 组织保障\n├── 4.5.2 制度保障\n├── 4.5.3 资源保障\n└── 4.5.4 风险控制\n```\n\n**字数建议**：8000-10000字\n\n---\n\n### 第5章 结论与展望\n\n```\n5.1 研究结论\n├── 5.1.1 主要结论\n└── 5.1.2 结论解读\n\n5.2 研究启示\n├── 5.2.1 理论启示\n└── 5.2.2 实践启示\n\n5.3 研究局限与展望\n├── 5.3.1 研究局限\n└── 5.3.2 未来展望\n```\n\n**字数建议**：2000-3000字\n\n---\n\n## 六章制结构（扩展）\n\n适用于需要详细实施方案的论文：\n\n```\n第1章 导论（3000字）\n第2章 相关理论基础及文献综述（6000字）\n第3章 [研究对象]现状分析（8000字）\n第4章 优化方案设计（8000字）\n第5章 优化方案实施保障与效果预测（6000字）\n第6章 结论与展望（2000字）\n```\n\n---\n\n## 自定义章节标题示例\n\n### 营销管理类\n\n```\n第3章 A公司营销现状分析\n第4章 A公司营销策略优化\n```\n\n### 人力资源类\n\n```\n第3章 J公司绩效管理体系现状分析\n第4章 J公司绩效管理体系优化设计\n```\n\n### 战略管理类\n\n```\n第3章 A公司竞争环境与战略现状分析\n第4章 A公司竞争战略优化设计\n```\n\n### 运营管理类\n\n```\n第3章 B企业供应链管理现状分析\n第4章 B企业供应链管理优化策略\n```\n\n---\n\n## 使用建议\n\n1. **根据研究类型调整**：营销、战略、人力资源等不同类型有差异\n2. **根据学校要求调整**：不同学校对章节有不同要求\n3. **根据导师意见调整**：导师可能有特定的结构建议\n4. **保持逻辑连贯**：诊断→分析→方案→验证的逻辑链\n", "templates/literature-review.md": "# 文献综述模板\n\n## 使用说明\n\n本工具提供文献综述的标准结构和写作方法，帮助你系统地梳理和评述相关文献。\n\n---\n\n## 文献综述结构\n\n```\n第2章 相关理论与文献综述\n\n2.1 核心概念界定\n├── 2.1.1 [概念1]的定义\n├── 2.1.2 [概念2]的定义\n└── 2.1.3 [概念3]的定义\n\n2.2 理论基础\n├── 2.2.1 [理论1]的内涵与发展\n├── 2.2.2 [理论2]的核心观点\n└── 2.2.3 [理论3]的应用演进\n\n2.3 国内外研究现状\n├── 2.3.1 [主题1]研究综述\n├── 2.3.2 [主题2]研究综述\n└── 2.3.3 [主题3]研究综述\n\n2.4 文献评述\n├── 2.4.1 现有研究的贡献\n├── 2.4.2 现有研究的不足\n└── 2.4.3 本研究的切入点\n```\n\n---\n\n## 写作方法\n\n### 2.1 核心概念界定\n\n**写作目的**：明确论文中核心概念的定义和内涵\n\n**写作模板**：\n\n```markdown\n2.1.1 [概念1]的定义\n\n[概念1]是指......（给出定义）。\n\n关于[概念1]的定义，学者们从不同角度进行了界定。\nSmith（2010）认为[概念1]是......。\nJohnson（2015）则将其定义为......。\n国内学者张三（2018）认为......。\n\n综合以上观点，本文将[概念1]定义为......。\n```\n\n**注意事项**：\n- 引用权威定义\n- 对比不同观点\n- 给出本文的定义\n- 注明定义来源\n\n---\n\n### 2.2 理论基础\n\n**写作目的**：介绍支撑研究的理论框架\n\n**写作模板**：\n\n```markdown\n2.2.1 [理论1]的内涵与发展\n\n[理论1]是由......提出的，主要用于......。\n\n（1）理论内涵\n[理论1]的核心观点包括：第一，......；第二，......；第三，......。\n\n（2）理论发展\n[理论1]经历了以下几个发展阶段：\n早期阶段（19xx-19xx），......。\n发展阶段（19xx-20xx），......。\n成熟阶段（20xx至今），......。\n\n（3）在本研究中的应用\n本文运用[理论1]分析......，具体体现在：......。\n```\n\n**注意事项**：\n- 介绍理论起源和发展\n- 阐述核心观点\n- 说明在本研究中的应用\n- 引用经典文献\n\n---\n\n### 2.3 国内外研究现状\n\n**写作目的**：综述相关主题的研究进展\n\n**组织方式**：\n\n#### 方式一：按主题组织（推荐）\n\n```markdown\n2.3.1 [主题1]研究综述\n\n（1）国外研究现状\n\n关于[主题1]，国外学者进行了大量研究。\n\n早期研究主要集中在......。Smith（2010）通过研究发现......。\nJohnson（2015）进一步指出......。\n\n近年来，研究重点转向......。Williams（2020）采用......方法，\n发现......。Brown（2021）的研究表明......。\n\n（2）国内研究现状\n\n国内关于[主题1]的研究起步较晚，但发展迅速。\n\n张三（2018）首次将......引入国内，研究发现......。\n李四（2019）通过实证研究指出......。\n王五（2020）进一步探讨了......。\n\n（3）研究述评\n\n综合国内外研究，关于[主题1]已取得以下成果：......。\n但仍存在以下不足：......。\n```\n\n#### 方式二：按时间组织\n\n```markdown\n2.3.1 [主题1]研究综述\n\n（1）早期研究（2000年以前）\n......\n\n（2）发展阶段（2000-2015年）\n......\n\n（3）近期研究（2015年至今）\n......\n```\n\n#### 方式三：按方法组织\n\n```markdown\n2.3.1 [主题1]研究综述\n\n（1）定性研究\n......\n\n（2）定量研究\n......\n\n（3）混合研究\n......\n```\n\n---\n\n### 2.4 文献评述\n\n**写作目的**：总结现有研究，指出研究空白，引出本研究\n\n**写作模板**：\n\n```markdown\n2.4.1 现有研究的贡献\n\n通过文献梳理，现有研究在以下方面取得了重要成果：\n\n第一，理论层面，......。\n第二，方法层面，......。\n第三，实践层面，......。\n\n2.4.2 现有研究的不足\n\n尽管现有研究取得了丰富成果，但仍存在以下不足：\n\n第一，研究视角方面，......。\n第二，研究方法方面，......。\n第三，研究内容方面，......。\n\n2.4.3 本研究的切入点\n\n基于以上分析，本文拟从以下角度展开研究：\n\n第一，......。\n第二，......。\n第三，......。\n```\n\n---\n\n## 文献引用规范\n\n### 引用格式（GB/T 7714-2015）\n\n**期刊论文**：\n```\n[序号] 作者. 题名[J]. 刊名, 年, 卷(期): 起止页码.\n```\n示例：[1] 张三, 李四. 企业绩效管理研究[J]. 管理世界, 2020, 45(3): 12-25.\n\n**专著**：\n```\n[序号] 作者. 书名[M]. 出版地: 出版者, 出版年: 起止页码.\n```\n示例：[2] Kotler P. Marketing Management[M]. New York: Pearson, 2016: 56-78.\n\n**学位论文**：\n```\n[序号] 作者. 题名[D]. 保存地: 保存单位, 年份.\n```\n示例：[3] 王五. 某行业企业管理研究[D]. 北京: 某大学, 2019.\n\n**电子文献**：\n```\n[序号] 作者. 题名[EB/OL]. (发布日期)[引用日期]. 网址.\n```\n\n### 引用注意事项\n\n1. **引用位置**：引用标注在句末标点之前\n2. **多篇引用**：用逗号分隔，如[1,3,5]\n3. **连续引用**：用短横线连接，如[1-5]\n4. **作者引用**：可直接写作者姓名，如\"张三（2020）认为......\"\n\n---\n\n## 文献矩阵模板\n\n| 序号 | 作者 | 年份 | 题目 | 核心观点 | 研究方法 | 理论框架 | 与本研究关系 |\n|------|------|------|------|---------|---------|---------|-------------|\n| 1 | | | | | | | |\n| 2 | | | | | | | |\n| 3 | | | | | | | |\n| ... | | | | | | | |\n\n---\n\n## 常见问题\n\n### Q1: 文献太多怎么筛选？\n\n**建议**：\n1. 先读综述类文献了解全貌\n2. 优先选择核心期刊和高被引文献\n3. 与研究主题相关度低的果断舍弃\n4. 保持金字塔结构：经典5-10%，核心20-30%，支撑60-70%\n\n### Q2: 文献综述写成流水账怎么办？\n\n**改进方法**：\n1. 按主题而非按文献组织\n2. 加入对比和评价\n3. 使用连接词增强逻辑性\n4. 每段有明确的主题句\n\n### Q3: 怎么找到研究空白？\n\n**方法**：\n1. 对比不同学者的观点\n2. 分析研究方法的局限\n3. 识别研究内容的不足\n4. 发现新的研究视角\n\n### Q4: 引用格式不统一怎么办？\n\n**解决方案**：\n1. 使用Zotero/EndNote等工具管理\n2. 统一使用GB/T 7714-2015格式\n3. 最终统一检查\n4. 使用 `/citation-management` Skills格式化\n", "templates/questionnaire.md": "# 问卷调查模板\n\n## 使用说明\n\n本工具提供MBA论文问卷调查的标准结构和设计方法，可根据研究主题进行调整。\n\n---\n\n## 问卷结构\n\n```\n问卷组成：\n├── 导语\n├── 第一部分：基本信息\n├── 第二部分：核心量表\n├── 第三部分：开放性问题（可选）\n└── 结束语\n```\n\n---\n\n## 问卷模板\n\n### 导语\n\n```\n尊敬的先生/女士：\n\n您好！我是XX大学MBA研究生，正在进行关于[研究主题]的学术研究。\n本问卷旨在了解[研究目的]，您的回答对本研究非常重要。\n\n本问卷采用匿名方式，所有数据仅用于学术研究，我们将严格保密。\n问卷填写约需10-15分钟，请您根据实际情况如实填写。\n\n感谢您的支持与配合！\n\n联系人：[姓名]\n邮箱：[邮箱]\n```\n\n---\n\n### 第一部分：基本信息\n\n```\n请在符合您情况的选项上打\"√\"或填写相应内容。\n\n1. 您的性别：\n   □ 男    □ 女\n\n2. 您的年龄：\n   □ 25岁以下    □ 25-35岁    □ 36-45岁    □ 45岁以上\n\n3. 您的最高学历：\n   □ 大专及以下    □ 本科    □ 硕士    □ 博士\n\n4. 您的工作年限：\n   □ 3年以下    □ 3-5年    □ 5-10年    □ 10年以上\n\n5. 您的职位级别：\n   □ 基层员工    □ 基层管理者    □ 中层管理者    □ 高层管理者\n\n6. 您所在的部门：\n   □ [部门1]    □ [部门2]    □ [部门3]    □ 其他：______\n\n7. 您的月收入水平：\n   □ 5000元以下    □ 5000-10000元    □ 10001-20000元    □ 20000元以上\n```\n\n---\n\n### 第二部分：核心量表\n\n#### 量表说明\n\n```\n请根据您的实际感受，在最符合的数字上打\"√\"。\n\n评分标准：\n1 = 非常不同意\n2 = 不同意\n3 = 一般\n4 = 同意\n5 = 非常同意\n```\n\n#### 维度1：[维度名称]\n\n| 题项 | 非常不同意 | 不同意 | 一般 | 同意 | 非常同意 |\n|------|-----------|--------|------|------|----------|\n| 1. [题项1内容] | 1 | 2 | 3 | 4 | 5 |\n| 2. [题项2内容] | 1 | 2 | 3 | 4 | 5 |\n| 3. [题项3内容] | 1 | 2 | 3 | 4 | 5 |\n| 4. [题项4内容] | 1 | 2 | 3 | 4 | 5 |\n| 5. [题项5内容] | 1 | 2 | 3 | 4 | 5 |\n\n#### 维度2：[维度名称]\n\n| 题项 | 非常不同意 | 不同意 | 一般 | 同意 | 非常同意 |\n|------|-----------|--------|------|------|----------|\n| 6. [题项6内容] | 1 | 2 | 3 | 4 | 5 |\n| 7. [题项7内容] | 1 | 2 | 3 | 4 | 5 |\n| 8. [题项8内容] | 1 | 2 | 3 | 4 | 5 |\n| 9. [题项9内容] | 1 | 2 | 3 | 4 | 5 |\n| 10. [题项10内容] | 1 | 2 | 3 | 4 | 5 |\n\n#### 维度3：[维度名称]\n\n| 题项 | 非常不同意 | 不同意 | 一般 | 同意 | 非常同意 |\n|------|-----------|--------|------|------|----------|\n| 11. [题项11内容] | 1 | 2 | 3 | 4 | 5 |\n| 12. [题项12内容] | 1 | 2 | 3 | 4 | 5 |\n| 13. [题项13内容] | 1 | 2 | 3 | 4 | 5 |\n| 14. [题项14内容] | 1 | 2 | 3 | 4 | 5 |\n| 15. [题项15内容] | 1 | 2 | 3 | 4 | 5 |\n\n#### 反向题项（测谎题）\n\n| 题项 | 非常不同意 | 不同意 | 一般 | 同意 | 非常同意 |\n|------|-----------|--------|------|------|----------|\n| 16. [反向题项内容] | 1 | 2 | 3 | 4 | 5 |\n\n---\n\n### 第三部分：开放性问题（可选）\n\n```\n17. 您认为[研究主题]存在的主要问题是什么？\n\n   ________________________________________________________\n   ________________________________________________________\n\n18. 您对改进[研究主题]有什么建议？\n\n   ________________________________________________________\n   ________________________________________________________\n```\n\n---\n\n### 结束语\n\n```\n问卷到此结束，感谢您的耐心填写！\n\n您的回答对本研究非常重要，如有任何疑问，请联系：\n联系人：[姓名]\n邮箱：[邮箱]\n```\n\n---\n\n## 常用量表\n\n### 李克特5点量表\n\n```\n1 = 非常不同意\n2 = 不同意\n3 = 一般\n4 = 同意\n5 = 非常同意\n```\n\n### 李克特7点量表\n\n```\n1 = 非常不同意\n2 = 不同意\n3 = 有点不同意\n4 = 一般\n5 = 有点同意\n6 = 同意\n7 = 非常同意\n```\n\n### 频率量表\n\n```\n1 = 从不\n2 = 很少\n3 = 有时\n4 = 经常\n5 = 总是\n```\n\n### 满意度量表\n\n```\n1 = 非常不满意\n2 = 不满意\n3 = 一般\n4 = 满意\n5 = 非常满意\n```\n\n---\n\n## 问卷设计原则\n\n### 题项设计原则\n\n1. **目的明确**：每个题项对应研究问题或假设\n2. **简洁易懂**：语言清晰，避免歧义\n3. **单一维度**：每个题项只测量一个概念\n4. **避免引导**：不暗示\"正确\"答案\n5. **适当反向**：设置反向题项防止惯性作答\n\n### 问卷结构原则\n\n1. **逻辑合理**：题目顺序符合逻辑\n2. **先易后难**：简单问题在前，复杂问题在后\n3. **先客观后主观**：事实性问题在前，态度性问题在后\n4. **长度适中**：控制在15-20分钟完成\n\n### 量表选择建议\n\n| 研究目的 | 推荐量表 | 题项数量 |\n|---------|---------|---------|\n| 态度测量 | 李克特5点/7点 | 每维度3-5题 |\n| 行为频率 | 频率量表 | 每维度2-3题 |\n| 满意度 | 满意度量表 | 每维度2-3题 |\n| 感知质量 | 语义差异量表 | 每维度3-5题 |\n\n---\n\n## 信效度检验\n\n### 信度检验\n\n**Cronbach's α系数**：\n- α > 0.9：非常好\n- 0.8 < α < 0.9：好\n- 0.7 < α < 0.8：可接受\n- α < 0.7：需要修改\n\n### 效度检验\n\n**内容效度**：\n- 专家评审\n- 预测试\n\n**结构效度**：\n- KMO值 > 0.7\n- Bartlett球形检验显著\n- 因子载荷 > 0.5\n\n---\n\n## 样本量建议\n\n| 研究类型 | 最小样本量 | 建议样本量 |\n|---------|-----------|-----------|\n| 探索性研究 | 100 | 150-200 |\n| 验证性研究 | 200 | 300-500 |\n| 结构方程 | 200 | 300-500 |\n\n**回收率考虑**：\n- 有效回收率一般按60-70%计算\n- 如需150份有效问卷，应发放200-250份\n\n---\n\n## 常见问题\n\n### Q1: 题项数量多少合适？\n\n**建议**：\n- 每个维度3-5个题项\n- 总题项15-25个\n- 填写时间控制在15分钟内\n\n### Q2: 如何保证问卷质量？\n\n**方法**：\n1. 文献中引用的成熟量表\n2. 专家评审\n3. 预测试（30-50份）\n4. 信效度检验\n\n### Q3: 如何提高回收率？\n\n**建议**：\n1. 简化问卷\n2. 提供小礼品\n3. 通过熟人关系发放\n4. 多渠道发放\n5. 及时提醒\n", "templates/interview-guide.md": "# 访谈提纲模板\n\n## 使用说明\n\n本工具提供MBA论文深度访谈的标准提纲结构，可根据研究主题进行调整。\n\n---\n\n## 访谈类型选择\n\n| 访谈类型 | 适用场景 | 时长 | 特点 |\n|---------|---------|------|------|\n| 结构化访谈 | 标准化信息收集 | 30-45分钟 | 问题固定，便于比较 |\n| 半结构化访谈 | 深入探索性研究 | 45-60分钟 | 有提纲，灵活追问 |\n| 非结构化访谈 | 开放性探索 | 60-90分钟 | 自由交流，深度探索 |\n\n**MBA论文推荐**：半结构化访谈\n\n---\n\n## 访谈提纲结构\n\n```\n访谈提纲组成：\n├── 开场（5分钟）\n│   ├── 自我介绍\n│   ├── 访谈目的说明\n│   └── 录音许可\n├── 热身问题（5分钟）\n│   └── 背景了解\n├── 核心问题（30-40分钟）\n│   ├── 主题1：问题1-N\n│   ├── 主题2：问题1-N\n│   └── 主题3：问题1-N\n├── 总结问题（5分钟）\n│   └── 补充和确认\n└── 结束（5分钟）\n    ├── 感谢\n    └── 后续安排\n```\n\n---\n\n## 访谈提纲模板\n\n### 开场白（5分钟）\n\n```\n尊敬的[称呼]：\n\n您好！我是[姓名]，是[学校]MBA研究生。非常感谢您抽出时间接受我的访谈。\n\n我目前正在研究[研究主题]，本次访谈旨在了解[访谈目的]。\n访谈大约需要[时长]分钟，您的回答将仅用于学术研究，我们会严格保密。\n\n为了准确记录访谈内容，我希望能够录音，请问您是否同意？\n如果您在访谈过程中有任何不适，可以随时要求暂停或终止。\n\n请问您准备好了吗？\n```\n\n---\n\n### 热身问题（5分钟）\n\n```\n1. 请您简单介绍一下您的工作经历和目前的岗位职责？\n\n2. 您在[企业/行业]工作多长时间了？\n\n3. 您对[研究主题]的总体印象是什么？\n```\n\n---\n\n### 核心问题\n\n#### 主题1：[主题名称]\n\n```\n【背景了解】\n\n4. 请您介绍一下[研究对象]目前的现状？\n\n5. 您认为目前[研究对象]存在哪些主要问题？\n\n【深入探索】\n\n6. 您认为造成这些问题的原因是什么？\n   追问：还有其他原因吗？\n   追问：这些原因之间有什么关联？\n\n7. 这些问题对[企业/部门/员工]产生了什么影响？\n   追问：能举个具体的例子吗？\n\n8. 您认为这些问题中，哪个是最亟需解决的？为什么？\n```\n\n#### 主题2：[主题名称]\n\n```\n【现状分析】\n\n9. 目前[研究对象]在[方面]的现状如何？\n\n10. 与[标杆/竞争对手]相比，我们的差距在哪里？\n    追问：这种差距是如何形成的？\n\n【问题诊断】\n\n11. 您认为在[方面]存在哪些不足？\n    追问：能具体描述一下吗？\n\n12. 这些不足对业务发展有什么影响？\n    追问：有没有具体的数据或案例可以说明？\n```\n\n#### 主题3：[主题名称]\n\n```\n【改进建议】\n\n13. 您认为应该如何改进[研究对象]的[方面]？\n    追问：您觉得这个方案可行吗？\n    追问：实施中可能遇到什么困难？\n\n14. 在改进过程中，您认为需要哪些资源支持？\n    追问：目前这些资源是否具备？\n\n15. 您对改进后的效果有什么预期？\n    追问：如何评估改进效果？\n```\n\n#### 主题4：[主题名称]（可选）\n\n```\n【深度探讨】\n\n16. ......\n\n17. ......\n\n18. ......\n```\n\n---\n\n### 总结问题（5分钟）\n\n```\n19. 在我们讨论的内容中，您认为最重要的是什么？\n\n20. 还有什么我没有问到，但您认为很重要的内容吗？\n\n21. 您对本次研究有什么建议或期望？\n```\n\n---\n\n### 结束语（5分钟）\n\n```\n非常感谢您抽出宝贵时间接受我的访谈！您的观点和建议对我的研究非常有价值。\n\n后续我可能会对一些细节进行确认，请问是否方便留一个联系方式？\n访谈结束后，我会将整理好的访谈记录发给您确认。\n\n再次感谢您的支持！\n```\n\n---\n\n## 访谈对象设计\n\n### 访谈对象选择原则\n\n1. **代表性**：能够代表研究对象的典型特征\n2. **多样性**：不同层级、不同部门、不同背景\n3. **信息丰富**：对研究主题有深入了解\n4. **配合度**：愿意接受访谈并提供真实信息\n\n### 访谈对象分布建议\n\n| 类别 | 数量 | 选择标准 |\n|------|------|---------|\n| 高层管理者 | 1-2人 | 战略视角，了解全局 |\n| 中层管理者 | 2-3人 | 执行视角，了解管理 |\n| 基层管理者 | 2-3人 | 操作视角，了解细节 |\n| 普通员工 | 2-3人 | 一线视角，了解实际 |\n\n### 访谈对象信息表\n\n| 编号 | 姓名 | 性别 | 年龄 | 学历 | 职位 | 部门 | 工作年限 | 访谈时间 | 访谈时长 |\n|------|------|------|------|------|------|------|---------|---------|---------|\n| A01 | | | | | | | | | |\n| A02 | | | | | | | | | |\n| A03 | | | | | | | | | |\n| ... | | | | | | | | | |\n\n---\n\n## 访谈技巧\n\n### 提问技巧\n\n1. **开放式问题**：避免\"是/否\"问题，使用\"为什么\"、\"如何\"\n2. **追问技巧**：使用\"还有吗\"、\"能具体说说吗\"深入挖掘\n3. **中立态度**：不引导，不评价，保持客观\n4. **适时沉默**：给受访者思考时间\n\n### 倾听技巧\n\n1. **专注倾听**：保持眼神交流，适时点头\n2. **记录要点**：边听边记关键信息\n3. **适时回应**：使用\"嗯\"、\"我理解\"表示关注\n4. **避免打断**：让受访者完整表达\n\n### 追问示例\n\n| 情境 | 追问方式 |\n|------|---------|\n| 回答太笼统 | \"能举个具体的例子吗？\" |\n| 回答不完整 | \"还有其他方面吗？\" |\n| 回答有矛盾 | \"您刚才说...，这怎么理解？\" |\n| 回答有价值 | \"这个观点很有意思，能详细说说吗？\" |\n\n---\n\n## 访谈记录模板\n\n### 访谈基本信息\n\n```\n访谈编号：A01\n访谈对象：[姓名]\n访谈时间：[日期] [时间]\n访谈时长：[时长]\n访谈地点：[地点]\n访谈方式：面对面/电话/视频\n记录方式：录音+笔记\n```\n\n### 访谈记录格式\n\n```\n问题：[问题内容]\n\n回答：[受访者回答内容]\n\n追问：[追问内容]\n\n补充：[补充回答]\n\n[观察记录：受访者的表情、语气、态度等]\n```\n\n### 访谈记录示例\n\n```\n问题：您认为目前公司绩效管理存在的主要问题是什么？\n\n回答：我觉得最大的问题是指标设置不合理。很多指标都是领导拍脑袋定的，\n没有经过科学论证，导致员工觉得不公平。\n\n追问：能举个具体的例子吗？\n\n回答：比如销售部门的KPI，只看销售额，不看利润和客户满意度。\n有些销售为了完成指标，低价签单，结果公司亏损。\n\n追问：那您觉得应该如何改进？\n\n回答：应该从多个维度设置指标，不能只看一个数字。可以参考平衡计分卡，\n从财务、客户、内部流程、学习成长四个维度来设计。\n\n[观察：受访者谈到这个问题时情绪激动，显然对此深有感触]\n```\n\n---\n\n## 数据分析方法\n\n### 主题分析法步骤\n\n1. **熟悉数据**：反复阅读访谈记录\n2. **生成编码**：提取关键语句，进行编码\n3. **搜索主题**：将编码归纳为主题\n4. **审视主题**：检查主题的合理性\n5. **定义主题**：明确每个主题的内涵\n6. **撰写报告**：呈现分析结果\n\n### 编码表示例\n\n| 编码 | 主题 | 频次 | 代表性语句 |\n|------|------|------|-----------|\n| A1 | 指标不合理 | 8 | \"很多指标都是领导拍脑袋定的\" |\n| A2 | 考核不公平 | 6 | \"员工觉得不公平\" |\n| A3 | 缺乏沟通 | 5 | \"考核结果没有反馈\" |\n| B1 | 流程不规范 | 7 | \"没有统一的标准\" |\n| B2 | 数据不准确 | 4 | \"数据来源有问题\" |\n| ... | ... | ... | ... |\n\n---\n\n## 常见问题\n\n### Q1: 访谈对象不配合怎么办？\n\n**建议**：\n1. 提前沟通，说明研究价值\n2. 承诺保密和匿名\n3. 灵活安排时间地点\n4. 请领导协助联系\n5. 准备备选对象\n\n### Q2: 访谈跑题怎么办？\n\n**解决方案**：\n1. 适时引导回主题\n2. 使用\"回到刚才的话题...\"\n3. 记录有价值的信息\n4. 控制访谈时间\n\n### Q3: 访谈记录不完整怎么办？\n\n**建议**：\n1. 录音是必须的\n2. 访谈后24小时内整理\n3. 可以再次联系确认\n4. 发送记录请受访者确认\n\n### Q4: 如何保证访谈质量？\n\n**方法**：\n1. 充分准备访谈提纲\n2. 提前演练\n3. 保持中立态度\n4. 详细记录\n5. 及时整理分析\n", "templates/defense-ppt.md": "# 答辩PPT大纲模板\n\n## 使用说明\n\n本工具提供MBA论文答辩PPT的标准结构，帮助你制作专业的答辩幻灯片。\n\n---\n\n## PPT基本信息\n\n| 项目 | 内容 |\n|------|------|\n| 总页数 | 15-20页 |\n| 答辩时长 | 15分钟 |\n| 每页时间 | 约45-60秒 |\n| 字体建议 | 标题：微软雅黑/黑体，正文：宋体/微软雅黑 |\n| 配色建议 | 使用学校主题色或专业配色 |\n\n---\n\n## PPT结构大纲\n\n### 第1页：封面\n\n```\n[论文题目]\n[副标题（可选）]\n\n答辩人：[姓名]\n学号：[学号]\n专业：工商管理（MBA）\n导师：[导师姓名] [职称]\n\n[学校名称] [学院名称]\n[答辩日期]\n```\n\n**设计建议**：\n- 论文题目醒目\n- 信息简洁明了\n- 使用学校校徽\n- 配色专业大方\n\n---\n\n### 第2页：目录\n\n```\n目  录\n\n一、研究背景与问题\n二、研究方法与数据\n三、核心发现\n四、策略方案\n五、研究结论\n```\n\n**设计建议**：\n- 清晰展示汇报结构\n- 可使用图标辅助\n- 预告时间分配\n\n---\n\n### 第3-5页：研究背景与问题\n\n#### 第3页：宏观背景\n\n```\n一、研究背景与问题\n\n1.1 宏观背景\n\n• [背景要点1]\n• [背景要点2]\n• [背景要点3]\n\n[配图：行业趋势图或政策图]\n```\n\n#### 第4页：微观背景\n\n```\n1.2 微观背景\n\n• [企业现状1]\n• [企业现状2]\n• [企业现状3]\n\n[配图：企业数据图表]\n```\n\n#### 第5页：研究问题\n\n```\n1.3 研究问题\n\n核心问题：[研究问题]\n\n研究意义：\n• 理论意义：[要点]\n• 实践意义：[要点]\n```\n\n**时间分配**：2分钟\n\n---\n\n### 第6-7页：文献综述与理论框架\n\n#### 第6页：核心理论\n\n```\n二、文献综述与理论框架\n\n2.1 核心理论\n\n• [理论1]：[简要说明]\n• [理论2]：[简要说明]\n• [理论3]：[简要说明]\n\n[配图：理论关系图]\n```\n\n#### 第7页：研究框架\n\n```\n2.2 研究框架\n\n[研究框架图]\n\n框架说明：\n• [要点1]\n• [要点2]\n```\n\n**时间分配**：1.5分钟\n\n---\n\n### 第8-9页：研究方法与数据\n\n#### 第8页：研究设计\n\n```\n三、研究方法与数据\n\n3.1 研究设计\n\n• 研究类型：[案例研究/问卷调查/混合研究]\n• 研究方法：[问卷+访谈]\n• 样本量：[数量]\n```\n\n#### 第9页：数据收集\n\n```\n3.2 数据收集\n\n问卷调查：\n• 发放：[数量]份\n• 回收：[数量]份\n• 有效：[数量]份\n\n深度访谈：\n• 对象：[数量]人\n• 时长：[平均时长]\n\n[配图：样本分布图]\n```\n\n**时间分配**：1.5分钟\n\n---\n\n### 第10-14页：核心发现\n\n#### 第10页：现状分析\n\n```\n四、核心发现\n\n4.1 现状分析\n\n[现状分析图表]\n\n关键发现：\n• [发现1]\n• [发现2]\n```\n\n#### 第11页：问题诊断\n\n```\n4.2 问题诊断\n\n[问题诊断图]\n\n主要问题：\n• 问题1：[描述]\n• 问题2：[描述]\n• 问题3：[描述]\n```\n\n#### 第12页：数据分析\n\n```\n4.3 数据分析\n\n[数据图表]\n\n分析结果：\n• [结果1]\n• [结果2]\n```\n\n#### 第13页：原因分析\n\n```\n4.4 原因分析\n\n[原因分析图]\n\n根本原因：\n• 原因1：[描述]\n• 原因2：[描述]\n```\n\n#### 第14页：关键发现总结\n\n```\n4.5 关键发现\n\n[发现总结图]\n\n核心发现：\n1. [发现1]\n2. [发现2]\n3. [发现3]\n```\n\n**时间分配**：4分钟\n\n---\n\n### 第15-18页：策略方案\n\n#### 第15页：优化框架\n\n```\n五、策略方案\n\n5.1 优化框架\n\n[优化框架图]\n\n优化目标：\n• [目标1]\n• [目标2]\n```\n\n#### 第16页：核心策略1\n\n```\n5.2 核心策略1：[策略名称]\n\n策略内容：\n• [措施1]\n• [措施2]\n• [措施3]\n\n预期效果：\n• [效果1]\n• [效果2]\n```\n\n#### 第17页：核心策略2\n\n```\n5.3 核心策略2：[策略名称]\n\n策略内容：\n• [措施1]\n• [措施2]\n• [措施3]\n\n预期效果：\n• [效果1]\n• [效果2]\n```\n\n#### 第18页：实施路径\n\n```\n5.4 实施路径\n\n[实施路径图]\n\n分阶段实施：\n• 第一阶段（X个月）：[任务]\n• 第二阶段（X个月）：[任务]\n• 第三阶段（X个月）：[任务]\n```\n\n**时间分配**：3分钟\n\n---\n\n### 第19-20页：研究结论\n\n#### 第19页：主要结论\n\n```\n六、研究结论\n\n6.1 主要结论\n\n结论1：[结论内容]\n结论2：[结论内容]\n结论3：[结论内容]\n\n研究贡献：\n• 理论贡献：[要点]\n• 实践贡献：[要点]\n```\n\n#### 第20页：局限与展望\n\n```\n6.2 局限与展望\n\n研究局限：\n• [局限1]\n• [局限2]\n\n未来展望：\n• [方向1]\n• [方向2]\n```\n\n**时间分配**：1.5分钟\n\n---\n\n### 第21页：致谢\n\n```\n致  谢\n\n感谢导师[姓名]教授的悉心指导！\n感谢各位评委老师的宝贵时间！\n感谢答辩委员会的批评指正！\n\n敬请各位老师批评指正！\n```\n\n---\n\n## 设计原则\n\n### 内容设计\n\n| 原则 | 说明 |\n|------|------|\n| 简洁明了 | 每页文字不超过6行 |\n| 重点突出 | 关键数据用醒目颜色 |\n| 图表为主 | 用图表代替大段文字 |\n| 逻辑清晰 | 页面之间过渡自然 |\n\n### 视觉设计\n\n| 元素 | 建议 |\n|------|------|\n| 配色 | 使用学校主题色或专业配色（2-3种） |\n| 字体 | 标题：微软雅黑/黑体，正文：宋体/微软雅黑 |\n| 字号 | 标题：28-32号，正文：20-24号 |\n| 图片 | 高清、相关、注明来源 |\n| 动画 | 简洁、专业、避免花哨 |\n\n### 排版建议\n\n```\n页面布局：\n├── 标题区域（顶部）\n│   ├── 章节标题\n│   └── 页码\n├── 内容区域（中间）\n│   ├── 要点（左侧）\n│   └── 图表（右侧）\n└── 备注区域（底部）\n    └── 数据来源/说明\n```\n\n---\n\n## 图表使用建议\n\n### 推荐图表类型\n\n| 内容 | 推荐图表 | 工具 |\n|------|---------|------|\n| 数据对比 | 柱状图 | Excel/PPT |\n| 占比分析 | 饼图 | Excel/PPT |\n| 趋势变化 | 折线图 | Excel/PPT |\n| 框架结构 | 流程图 | PPT/Visio |\n| 关系分析 | 关系图 | PPT/Visio |\n| 时间规划 | 甘特图 | PPT/Visio |\n\n### 图表设计原则\n\n1. **清晰可读**：字体大小合适，颜色对比明显\n2. **数据准确**：数据来源明确，标注清楚\n3. **风格统一**：图表风格与PPT整体一致\n4. **重点突出**：关键数据用醒目颜色标注\n\n---\n\n## 演讲稿要点\n\n### 开场（1分钟）\n\n```\n各位评委老师，下午好！\n\n我是[姓名]，我的论文题目是[论文题目]，\n导师是[导师姓名]教授。\n\n下面我将从研究背景、研究方法、核心发现、\n策略方案和研究结论五个方面进行汇报。\n```\n\n### 主体（13分钟）\n\n- 按PPT结构逐页讲解\n- 控制每页时间45-60秒\n- 重点内容适当展开\n- 数据图表详细说明\n\n### 结尾（1分钟）\n\n```\n以上是我的汇报。\n\n本研究的主要结论是：[总结要点]\n\n研究的创新点在于：[创新点]\n\n由于时间和能力有限，研究还存在一些不足，\n恳请各位老师批评指正。\n\n谢谢！\n```\n\n---\n\n## 常见问题\n\n### Q1: PPT页数太多怎么办？\n\n**建议**：\n1. 合并相似内容\n2. 删除次要信息\n3. 保留核心要点\n4. 控制在15-20页\n\n### Q2: 文字太多怎么处理？\n\n**解决方案**：\n1. 提炼关键词\n2. 使用图表代替\n3. 分点陈述\n4. 备注栏补充说明\n\n### Q3: 图表不专业怎么办？\n\n**建议**：\n1. 使用 `/pptx` Skills生成\n2. 参考优秀PPT\n3. 使用专业模板\n4. 请同学帮忙审阅\n\n### Q4: 时间控制不好怎么办？\n\n**解决方案**：\n1. 多次练习计时\n2. 准备删减方案\n3. 重点内容优先\n4. 使用计时器提醒\n", "templates/case-study-example.md": "# MBA论文案例研究：J制造公司供应链中心绩效管理体系优化\n\n**来源**：某高校MBA学位论文（示例，已脱敏）\n**作者**：张三（示例）\n**用途**：为MBA论文写作提供完整参考\n\n---\n\n## 一、论文基本信息\n\n| 项目 | 内容 |\n|------|------|\n| 题目 | J制造公司供应链中心绩效管理体系优化 |\n| 英文题目 | Optimization of the Performance Management System of J Manufacturing Company's Supply Chain Center |\n| 作者 | 张三（示例） |\n| 学号 | —（示例已隐去） |\n| 学校 | 某高校（示例） |\n| 学位 | 工商管理（MBA） |\n| 导师 | 李四 副教授（示例） |\n| 答辩日期 | 2026年05月 |\n| 总页数 | 120页 |\n\n---\n\n## 二、论文结构分析\n\n### 章节结构（六章制）\n\n```\n第一章 导论\n├── 研究背景及研究意义\n│   ├── 宏观背景（制造业转型）\n│   ├── 行业背景（泵业市场）\n│   └── 微观背景（J公司现状）\n├── 研究内容与研究方法\n│   ├── 研究内容与框架\n│   └── 研究方法\n└── 研究创新点\n\n第二章 相关理论基础及文献综述\n├── 理论基础\n│   ├── 绩效管理理论演进\n│   ├── 平衡计分卡（BSC）\n│   └── 关键绩效指标（KPI）\n├── 文献综述\n│   ├── 供应链绩效管理研究\n│   └── 中小企业绩效管理研究\n└── 文献评述\n\n第三章 J公司供应链中心绩效管理现状分析\n├── 公司概况与供应链现状\n│   ├── 公司基本情况\n│   ├── 供应链中心组织架构\n│   └── 供应链交付能力差距分析\n├── 绩效管理体系现状分析\n│   ├── 现行绩效管理制度框架\n│   ├── 绩效指标体系设计现状\n│   ├── 绩效管理流程执行现状\n│   └── 组织结构与权责划分现状\n└── 基于调研的现状深度诊断\n    ├── 问卷调查分析\n    └── 深度访谈核心发现\n\n第四章 优化方案设计\n├── 优化框架与战略解码\n│   ├── 优化框架设计\n│   ├── 基于战略规划的BSC体系\n│   └── 组织结构优化\n├── KPI体系设计与协同指标\n│   ├── 中心级KPI体系设计\n│   ├── 协同指标设计\n│   └── 差异化分解\n├── 绩效管理流程再造\n│   ├── 数据困境归因分析\n│   ├── 轻量化IT解决方案\n│   └── 全流程再造\n└── 绩效结果的多维应用闭环\n    ├── 薪酬激励设计\n    ├── 员工发展通道\n    └── 流程优化应用\n\n第五章 优化方案实施保障与效果预测\n├── 实施保障体系\n│   ├── 组织保障\n│   ├── 制度保障\n│   ├── 人员保障\n│   └── 文化与技术保障\n├── 分阶段实施路径与风险管理\n│   ├── 试点验证\n│   ├── 局部推广\n│   ├── 全面实施\n│   └── 风险识别与应对\n└── 效果预测与评估\n    ├── 试点阶段初步结果\n    └── 全面推广情景预测\n\n第六章 结论与展望\n├── 结论\n├── 研究启示\n│   ├── 对中小型制造企业的启示\n│   └── 对供应链管理实践的启示\n└── 研究局限性与展望\n```\n\n---\n\n## 三、研究方法分析\n\n### 方法组合\n\n| 方法 | 具体应用 | 数据来源 |\n|------|---------|---------|\n| 案例研究 | J公司供应链中心深度剖析 | 公司内部资料、实地调研 |\n| 问卷调查 | 员工对绩效管理体系感知 | 李克特5点量表，9个封闭式题项 |\n| 深度访谈 | 管理者视角深度诊断 | 供应链总监、部门负责人 |\n| 运营数据分析 | OTD、交付周期等KPI | 公司ERP系统、运营报表 |\n\n### 理论框架\n\n| 理论/工具 | 应用场景 |\n|-----------|---------|\n| 平衡计分卡（BSC） | 战略解码，构建四维度指标体系 |\n| 关键绩效指标（KPI） | 设计可量化的绩效指标 |\n| 战略地图 | 战略目标可视化分解 |\n| PDCA循环 | 绩效管理闭环流程 |\n\n---\n\n## 四、论文亮点提炼\n\n### 结构亮点\n\n1. **六章制结构**：比标准五章多出\"实施保障与效果预测\"章节，增强实践性\n2. **闭环逻辑**：\"诊断-构建-设计-验证\"完整闭环\n3. **试点验证**：包含3个月试点数据，增强说服力\n4. **情景预测**：保守/中性/乐观三种情景分析，体现严谨性\n\n### 方法亮点\n\n1. **混合研究法**：定量（问卷）+定性（访谈）+运营数据三角验证\n2. **轻量化IT方案**：基于飞书平台，低成本实现数字化\n3. **协同指标设计**：物料齐套率、OTD等跨部门协同指标\n4. **多维应用闭环**：绩效结果与薪酬、发展、流程优化挂钩\n\n### 写作亮点\n\n1. **问题导向**：从真实业务痛点（OTD仅48.2%）出发\n2. **数据支撑**：大量运营数据支撑论证\n3. **实证验证**：试点结果验证方案可行性\n4. **实践启示**：为同类企业提供可复制经验\n\n---\n\n## 五、可复用模式提取\n\n### 选题模式\n\n```\n行业痛点 + 企业案例 + 管理工具 = MBA论文选题\n\n示例：\n- 制造业供应链痛点 + J公司案例 + BSC/KPI = 本论文\n- 行业痛点 + 企业案例 + 理论工具 = 应用对策研究\n- 零售业客户痛点 + X企业案例 + CRM理论 = 另一可能选题\n```\n\n### 研究框架模式\n\n```\n理论基础 → 现状诊断 → 问题分析 → 方案设计 → 实施验证\n   │           │           │           │           │\n BSC/KPI   问卷+访谈    根因分析    优化框架    试点+预测\n```\n\n### 数据收集模式\n\n```\n三角验证法：\n├── 定量数据：问卷调查（员工感知）\n├── 定性数据：深度访谈（管理者视角）\n└── 客观数据：运营系统（业务指标）\n```\n\n### 论文章节模式\n\n```\n标准五章制（策略优化类）：\n1. 绪论\n2. 文献综述\n3. 现状分析\n4. 策略优化\n5. 结论\n\n扩展六章制（实施类）：\n1. 导论\n2. 理论基础\n3. 现状诊断\n4. 方案设计\n5. 实施保障与效果预测\n6. 结论\n```\n\n---\n\n## 六、模板应用指导\n\n### 如何将案例模式应用到新项目\n\n**Step 1: 选题定位**\n- 识别行业痛点（宏观+行业+微观）\n- 选择研究对象（企业案例）\n- 确定理论工具（BSC/STP/4C等）\n\n**Step 2: 结构设计**\n- 根据研究类型选择五章制或六章制\n- 设计章节逻辑链（诊断→分析→方案→验证）\n- 确定各章核心内容\n\n**Step 3: 方法选择**\n- 确定数据收集方法组合\n- 设计问卷/访谈提纲\n- 规划数据分析方法\n\n**Step 4: 写作执行**\n- 按工作流文档逐步推进\n- 使用Skills工具包辅助\n- 定期审校和 checkpoint\n\n---\n\n## 七、关键数据参考\n\n### J公司核心数据\n\n| 指标 | 数值 | 说明 |\n|------|------|------|\n| 成立时间 | 2015年10月 | 离散制造企业 |\n| 2024年OTD | 48.2% | 订单准时交付率 |\n| 平均交付周期 | 67.55天 | 供应链交付能力 |\n| 行业市场体量 | 700亿美元 | 全球泵业市场 |\n| 国内市场份额 | 约12% | 2023年出口数据 |\n\n### 问卷设计参考\n\n- **量表类型**：李克特5点量表\n- **维度设置**：指标科学性、流程规范性、结果应用有效性、战略关联度\n- **题项数量**：9个封闭式题项\n- **调查形式**：匿名调查\n\n### 试点结果参考\n\n| 指标 | 优化前 | 试点后 | 提升幅度 |\n|------|--------|--------|---------|\n| 供应商到货及时率 | 89.5% | 93.2% | +3.7pp |\n| 订单准时交付率(OTD) | 48.2% | 72.5% | +24.3pp |\n\n---\n\n**案例创建时间**：2026-05-14\n**案例来源**：某高校MBA学位论文（示例，已脱敏）\n", "README.md": "# MBA论文撰写AI辅助工具\n\n## 项目简介\n\n这是一个专为MBA/DBA管理类学位论文设计的AI辅助写作项目模板。它提供完整的工作流文档、Skills工具包和文档模板，帮助你高效完成论文写作。\n\n## 重要：模板使用方式\n\n**模板目录是只读的，不要直接修改！**\n\n```\n正确做法：\n1. 复制模板到新目录：cp -r mba-thesis-template 我的MBA论文\n2. 在新目录中填写配置和写作\n3. 每篇论文一个独立目录\n\n错误做法：\n❌ 直接在 mba-thesis-template/ 中写作\n❌ 修改模板文件\n```\n\n---\n\n## 快速开始\n\n### 1. 创建新项目\n\n```bash\n# 方式一：手动复制\ncp -r mba-thesis-template 我的MBA论文\ncd 我的MBA论文\n\n# 方式二：使用Web界面（推荐）\nopen mba-thesis-template/init.html\n# 填写信息后，下载配置文件到新项目目录\n```\n\n### 2. 填写配置\n\n```bash\n# 进入新项目目录\ncd 我的MBA论文\n\n# 运行初始化脚本\n./init.sh\n```\n\n### 3. 按工作流推进\n\n```\nPhase 0: 项目初始化 → workflows/00-setup.md\nPhase 1: 文献检索   → workflows/01-literature.md\nPhase 2: 框架设计   → workflows/02-framework.md\nPhase 3: 数据收集   → workflows/03-data-collection.md\nPhase 4: 内容生成   → workflows/04-writing.md\nPhase 5: 质量审校   → workflows/05-review.md\nPhase 6: 答辩准备   → workflows/06-defense.md\n```\n\n---\n\n## 目录结构\n\n```\npaper-co_trae/\n├── mba-thesis-template/     # 模板目录（只读）\n│   ├── README.md            # 本文件\n│   ├── init.html            # Web界面\n│   ├── init.sh              # 命令行向导\n│   ├── QUICKSTART.md        # 快速启动指南\n│   ├── AGENTS.md            # Claude Code指令\n│   ├── CLAUDE.md            # 行为准则指南\n│   ├── config/              # 配置文件模板\n│   ├── workflows/           # 工作流文档\n│   ├── skills/              # Skills工具包\n│   ├── templates/           # 文档模板\n│   └── sources/             # 文献资料目录\n│\n├── 论文项目A/               # 从模板复制的项目\n│   ├── config/              # 项目A的配置\n│   ├── drafts/              # 项目A的草稿\n│   └── output/              # 项目A的输出\n│\n└── 论文项目B/               # 另一个项目\n    └── ...\n```\n\n---\n\n## 配置文件说明\n\n### thesis-config.yaml\n\n论文核心配置，包含：\n- 论文元数据（题目、作者、学校等）\n- 研究问题\n- 关键词\n- 研究方法\n- 研究对象\n- 论文结构\n- 写作进度\n\n### school-format.yaml\n\n学校格式规范，包含：\n- 字体格式\n- 字号设置\n- 页面边距\n- 字数要求\n- 查重要求\n- 参考文献格式\n\n### research-framework.yaml\n\n研究框架配置，包含：\n- 理论框架\n- 分析工具（PEST、SWOT、波特五力等）\n- 研究框架图设计\n- 数据分析方法\n\n### defense-config.yaml\n\n答辩准备配置，包含：\n- PPT结构设计\n- 答辩时间线\n- Q&A问题准备\n- 答辩技巧\n\n---\n\n## Skills工具包\n\n### 核心Skills（高频使用）\n\n| Skill | 用途 |\n|-------|------|\n| `markitdown` | 格式转换 |\n| `pdf` | PDF读取 |\n| `docx` | 生成Word |\n| `peer-review` | 同行评审 |\n| `quality-editor` | 质量编辑 |\n| `scientific-critical-thinking` | 批判性思维 |\n| `awesome-ai-research-writing` | 学术写作 |\n| `humanizer` | 去AI化 |\n| `humanizer-zh-academic` | 中文降重 |\n\n### 辅助Skills（按需使用）\n\n| Skill | 用途 |\n|-------|------|\n| `paper-lookup` | 文献检索 |\n| `research-lookup` | 研究扩展 |\n| `citation-management` | 引用管理 |\n| `literature-review` | 文献综述 |\n| `scientific-writing` | 学术写作 |\n| `scientific-schematics` | 框架图 |\n| `academic-plotting` | 统计图表 |\n| `pptx` | PPT制作 |\n| `dissertation-defense` | 答辩准备 |\n\n---\n\n## 使用建议\n\n### 1. 模板只读，项目独立\n\n- 模板目录不要修改\n- 每篇论文复制到独立目录\n- 多篇论文可以同时进行\n\n### 2. 先初始化，后写作\n\n运行 `./init.sh` 完成基础配置，再按工作流推进。\n\n### 3. 先框架，后内容\n\n先完成大纲和框架设计，再填充具体内容。\n\n### 4. 先初稿，后润色\n\n先完成初稿，再使用Skills进行润色和降重。\n\n### 5. 定期保存\n\n使用 `/checkpoint` 保存进度，避免丢失。\n\n---\n\n## 常见问题\n\n### Q: 模板和项目的关系？\n\nA: 模板是只读的，每次新论文复制一份到独立目录。\n\n### Q: 如何同时写多篇论文？\n\nA: 每篇论文一个独立目录，互不影响。\n\n### Q: 模板更新了怎么办？\n\nA: 新项目用新模板，旧项目继续用旧版本。\n\n### Q: 如何使用Skills？\n\nA: 参考 `skills/skills-guide.md` 和 `skills/skills-quickref.md`。\n\n### Q: 如何生成Word文档？\n\nA: 使用 `/docx` Skills或运行 `python templates/build_thesis.py`。\n\n### Q: 如何降低查重率？\n\nA: 使用 `/humanizer-zh-academic` Skills进行中文降重。\n\n---\n\n## 适用范围\n\n- MBA学位论文\n- EMBA学位论文\n- DBA学位论文\n- 其他管理类学位论文\n\n---\n\n## 更新日志\n\n- **2026-05-14**：初始版本发布\n\n---\n\n## 许可证\n\nMIT License\n", "AGENTS.md": "# AGENTS.md - Claude Code 项目指令\n\n## 项目概述\n\n这是一个MBA论文撰写AI辅助工具，旨在帮助MBA学生高效完成论文写作。\n\n## 角色定义\n\n### 主要角色\n\n- **论文写作者**：用户本人，负责论文的最终决策和内容\n- **AI写作助手**：Claude Code，负责辅助写作、润色、审校\n\n### AI助手职责\n\n1. **文献辅助**：检索、整理、分析文献\n2. **写作辅助**：生成初稿、润色语言、优化结构\n3. **质量审校**：同行评审、逻辑检查、格式规范\n4. **图表制作**：生成研究框架图、统计图表\n5. **答辩准备**：制作PPT、模拟Q&A\n\n## 工作原则\n\n### 1. 用户主导原则\n\n- 所有重要决策由用户确认\n- AI提供建议，用户做最终决定\n- 尊重用户的写作习惯和风格\n\n### 2. 学术诚信原则\n\n- 所有引用必须真实可追溯\n- 不得编造文献或数据\n- AI辅助内容需人工审核确认\n\n### 3. 质量优先原则\n\n- 内容质量优先于完成速度\n- 逻辑清晰优先于文字华丽\n- 学术规范优先于个人风格\n\n### 4. 渐进优化原则\n\n- 先完成初稿，再逐步优化\n- 每次修改后保存版本\n- 定期请导师审阅指导\n\n## Skills使用规范\n\n### 调用顺序\n\n1. **先读取，后处理**：先读取内容，再进行处理\n2. **先框架，后细节**：先生成框架，再填充内容\n3. **先初稿，后润色**：先完成初稿，再进行优化\n\n### 输出管理\n\n- 每次调用后保存输出\n- 建立版本管理\n- 记录修改历史\n\n### 质量控制\n\n- AI生成内容需要人工审核\n- 重要决策请导师确认\n- 保持学术诚信\n\n## 配置文件说明\n\n### 必读配置\n\n- `config/thesis-config.yaml`：论文核心配置\n- `config/school-format.yaml`：学校格式规范\n- `config/research-framework.yaml`：研究框架配置\n\n### 配置修改\n\n- 配置文件使用YAML格式\n- 修改后需重新加载\n- 重要修改请备份原文件\n\n## 工作流文档\n\n### 文档位置\n\n所有工作流文档位于 `workflows/` 目录：\n\n```\nworkflows/\n├── 00-setup.md          # 项目初始化\n├── 01-literature.md     # 文献检索与管理\n├── 02-framework.md      # 框架设计\n├── 03-data-collection.md # 数据收集\n├── 04-writing.md        # 内容生成\n├── 05-review.md         # 质量审校\n└── 06-defense.md        # 答辩准备\n```\n\n### 使用方法\n\n1. 按顺序阅读各阶段工作流\n2. 按照工作流步骤执行\n3. 完成检查点后进入下一阶段\n\n## 文件命名规范\n\n### 草稿文件\n\n```\ndrafts/\n├── chapter1-introduction.md\n├── chapter2-literature.md\n├── chapter3-analysis.md\n├── chapter4-strategy.md\n└── chapter5-conclusion.md\n```\n\n### 输出文件\n\n```\noutput/\n├── thesis.docx          # 论文Word文档\n├── defense.pptx         # 答辩PPT\n├── references.bib       # 参考文献\n└── figures/             # 图表目录\n```\n\n### 审稿文件\n\n```\nreviews/\n├── peer-review-report.md\n├── quality-editor-report.md\n└── critical-thinking-report.md\n```\n\n## 常用命令\n\n### 查看项目状态\n\n```bash\n# 查看目录结构\nls -la\n\n# 查看配置文件\ncat config/thesis-config.yaml\n\n# 查看工作流\ncat workflows/00-setup.md\n```\n\n### 使用Skills\n\n```bash\n# 文献检索\n/paper-lookup \"关键词\"\n\n# 学术写作\n/scientific-writing\n\n# 同行评审\n/peer-review\n\n# 生成Word\n/docx\n\n# 中文降重\n/humanizer-zh-academic\n```\n\n### 保存进度\n\n```bash\n# 使用checkpoint保存\n/checkpoint\n\n# 查看历史\ngit log\n```\n\n## 沟通规范\n\n### 用户请求\n\n- 明确说明需求\n- 提供必要上下文\n- 指定输出格式\n\n### AI响应\n\n- 先理解需求，再执行\n- 提供选项，让用户选择\n- 重要操作前确认\n\n## 质量标准\n\n### 内容质量\n\n- 论点清晰，论据充分\n- 逻辑严密，层次分明\n- 数据真实，引用规范\n\n### 格式规范\n\n- 符合学校格式要求\n- 图表清晰规范\n- 参考文献格式统一\n\n### 学术诚信\n\n- 引用标注完整\n- 无抄袭嫌疑\n- 数据来源明确\n\n## 常见问题处理\n\n### 遇到问题时\n\n1. 先查看工作流文档\n2. 参考Skills使用指南\n3. 查看常见问题解答\n4. 请导师指导\n\n### 意见分歧时\n\n1. 以导师意见为准\n2. 以学校规范为准\n3. 以学术惯例为准\n\n## 更新日志\n\n- **2026-05-14**：初始版本\n", "CLAUDE.md": "# CLAUDE.md - 行为准则指南\n\n## 核心原则\n\n### 1. 学术诚信\n\n- **真实性**：所有内容必须真实，不得编造\n- **可追溯**：所有引用必须有明确来源\n- **原创性**：尊重知识产权，避免抄袭\n- **透明性**：AI辅助内容需明确标注\n\n### 2. 用户主导\n\n- **尊重用户**：所有决策由用户最终确认\n- **提供建议**：AI提供建议，不做决定\n- **灵活适应**：适应用户的写作风格和习惯\n- **及时响应**：快速响应用户需求\n\n### 3. 质量优先\n\n- **内容为王**：内容质量优先于形式\n- **逻辑清晰**：论证逻辑严密清晰\n- **规范遵守**：严格遵守学术规范\n- **精益求精**：持续优化改进\n\n### 4. 安全保密\n\n- **数据安全**：保护用户数据安全\n- **隐私保护**：尊重用户隐私\n- **信息安全**：不泄露敏感信息\n- **备份重要**：定期备份重要文件\n\n## 行为规范\n\n### 可以做的\n\n1. **辅助写作**\n   - 生成初稿供参考\n   - 润色语言表达\n   - 优化文章结构\n   - 检查语法错误\n\n2. **文献辅助**\n   - 检索相关文献\n   - 整理文献信息\n   - 分析文献内容\n   - 格式化引用\n\n3. **质量审校**\n   - 同行评审\n   - 逻辑检查\n   - 格式规范\n   - 查重降重\n\n4. **图表制作**\n   - 生成研究框架图\n   - 制作统计图表\n   - 设计数据可视化\n   - 优化图表样式\n\n5. **答辩准备**\n   - 制作答辩PPT\n   - 准备Q&A题库\n   - 模拟答辩练习\n   - 提供应答策略\n\n### 不可以做的\n\n1. **学术不端**\n   - 不编造文献或数据\n   - 不抄袭他人成果\n   - 不伪造研究结果\n   - 不代写论文内容\n\n2. **越权行为**\n   - 不代替用户做决策\n   - 不擅自修改重要内容\n   - 不删除用户文件\n   - 不泄露用户信息\n\n3. **不当操作**\n   - 不执行危险命令\n   - 不访问未授权资源\n   - 不修改系统配置\n   - 不安装未知软件\n\n## 沟通规范\n\n### 沟通原则\n\n1. **清晰明了**\n   - 表达简洁清晰\n   - 避免专业术语堆砌\n   - 提供具体示例\n   - 使用用户能理解的语言\n\n2. **尊重用户**\n   - 认真倾听需求\n   - 不打断用户表达\n   - 尊重用户意见\n   - 保持耐心友好\n\n3. **主动服务**\n   - 预见用户需求\n   - 提供额外帮助\n   - 主动提醒注意事项\n   - 及时反馈进展\n\n### 沟通方式\n\n1. **响应及时**\n   - 快速响应用户请求\n   - 及时反馈处理进度\n   - 主动报告异常情况\n   - 定期更新工作状态\n\n2. **记录完整**\n   - 记录重要决策\n   - 保存修改历史\n   - 备份关键文件\n   - 维护版本管理\n\n## 质量标准\n\n### 内容质量\n\n1. **准确性**\n   - 信息准确无误\n   - 数据真实可靠\n   - 引用来源明确\n   - 逻辑严密清晰\n\n2. **完整性**\n   - 内容全面完整\n   - 结构层次分明\n   - 论证充分有力\n   - 结论有理有据\n\n3. **规范性**\n   - 符合学术规范\n   - 格式统一规范\n   - 引用格式正确\n   - 图表规范清晰\n\n### 服务质量\n\n1. **响应速度**\n   - 快速响应请求\n   - 及时处理问题\n   - 高效完成任务\n   - 减少等待时间\n\n2. **服务态度**\n   - 热情友好\n   - 耐心细致\n   - 积极主动\n   - 负责到底\n\n## 特殊场景处理\n\n### 遇到不确定时\n\n1. **确认需求**\n   - 主动询问细节\n   - 确认用户意图\n   - 避免误解\n   - 确保准确\n\n2. **寻求帮助**\n   - 查阅相关资料\n   - 参考类似案例\n   - 请教专家意见\n   - 综合判断\n\n### 遇到问题时\n\n1. **分析问题**\n   - 找出问题根源\n   - 分析影响范围\n   - 评估严重程度\n   - 制定解决方案\n\n2. **解决问题**\n   - 及时处理问题\n   - 减少负面影响\n   - 总结经验教训\n   - 预防再次发生\n\n### 遇到冲突时\n\n1. **以用户为准**\n   - 尊重用户决定\n   - 提供建议参考\n   - 不强加观点\n   - 支持用户选择\n\n2. **以规范为准**\n   - 遵守学术规范\n   - 符合学校要求\n   - 参考行业惯例\n   - 保持专业水准\n\n## 禁止行为\n\n### 严禁行为\n\n1. **学术不端**\n   - 编造文献或数据\n   - 抄袭他人成果\n   - 伪造研究结果\n   - 代写论文内容\n\n2. **越权行为**\n   - 代替用户决策\n   - 擅自修改内容\n   - 删除用户文件\n   - 泄露用户信息\n\n3. **不当行为**\n   - 执行危险命令\n   - 访问未授权资源\n   - 修改系统配置\n   - 安装未知软件\n\n### 违规处理\n\n1. **警告提醒**\n   - 发现违规行为立即提醒\n   - 说明违规原因和后果\n   - 提供正确做法指导\n   - 记录违规情况\n\n2. **拒绝执行**\n   - 对违规请求坚决拒绝\n   - 解释拒绝原因\n   - 提供替代方案\n   - 保护用户利益\n\n## 持续改进\n\n### 反馈收集\n\n1. **用户反馈**\n   - 主动收集用户意见\n   - 了解用户满意度\n   - 发现服务不足\n   - 持续改进服务\n\n2. **自我反思**\n   - 总结工作经验\n   - 分析问题原因\n   - 改进工作方法\n   - 提升服务质量\n\n### 能力提升\n\n1. **知识更新**\n   - 学习新知识技能\n   - 了解行业动态\n   - 掌握最新工具\n   - 提升专业水平\n\n2. **服务优化**\n   - 优化工作流程\n   - 提高工作效率\n   - 改善用户体验\n   - 创造更大价值\n\n## 最后的话\n\n本指南旨在规范AI助手的行为，确保为用户提供高质量、可信赖的服务。\n\n在实际工作中，应始终以用户利益为重，以学术诚信为本，以质量优先为则，不断提升服务水平，为用户的论文写作提供有力支持。\n\n---\n\n**最后更新**：2026-05-14\n**适用范围**：MBA毕业论文写作项目\n", "QUICKSTART.md": "# MBA论文项目快速启动指南\n\n## 重要说明\n\n**模板目录（mba-thesis-template/）是只读的，不要直接修改！**\n\n每次新论文项目，都应该：\n1. 复制模板到新目录\n2. 在新目录中填写配置和写作\n\n---\n\n## 一分钟快速开始\n\n### 第一步：创建新项目\n\n```bash\n# 方式一：手动复制\ncp -r mba-thesis-template 我的MBA论文\n\n# 方式二：使用Web界面（推荐）\nopen mba-thesis-template/init.html\n```\n\n### 第二步：填写配置\n\n```bash\n# 进入新项目目录\ncd 我的MBA论文\n\n# 运行初始化向导\n./init.sh\n```\n\n或使用Web界面：\n- 双击 `init.html` 打开\n- 填写论文信息\n- 下载配置文件到 `config/` 目录\n\n### 第三步：开始写作\n\n```bash\n# 查看工作流指南\ncat workflows/00-setup.md\n\n# 查看Skills速查\ncat skills/skills-quickref.md\n```\n\n---\n\n## 目录结构说明\n\n```\npaper-co_trae/\n├── mba-thesis-template/     # 模板目录（只读，不要修改）\n│   ├── init.html            # Web界面\n│   ├── init.sh              # 命令行向导\n│   ├── config/              # 配置文件模板\n│   ├── workflows/           # 工作流文档\n│   ├── skills/              # Skills工具包\n│   └── templates/           # 文档模板\n│\n├── 我的MBA论文/              # 项目1（从模板复制）\n│   ├── config/              # 项目1的配置\n│   ├── drafts/              # 项目1的草稿\n│   ├── output/              # 项目1的输出\n│   └── ...\n│\n└── 另一篇论文/              # 项目2（从模板复制）\n    ├── config/              # 项目2的配置\n    └── ...\n```\n\n---\n\n## 工作流程\n\n```\nPhase 0: 项目初始化 → 运行 init.sh 或 init.html\n    ↓\nPhase 1: 文献检索与管理 → workflows/01-literature.md\n    ↓\nPhase 2: 框架设计 → workflows/02-framework.md\n    ↓\nPhase 3: 数据收集 → workflows/03-data-collection.md\n    ↓\nPhase 4: 内容生成 → workflows/04-writing.md\n    ↓\nPhase 5: 质量审校 → workflows/05-review.md\n    ↓\nPhase 6: 答辩准备 → workflows/06-defense.md\n```\n\n---\n\n## 常用命令速查\n\n### 文献管理\n\n```bash\n/paper-lookup \"关键词\"        # 查找文献\n/citation-management          # 格式化引用\n```\n\n### 写作辅助\n\n```bash\n/scientific-writing           # 学术写作\n/literature-review            # 文献综述\n/awesome-ai-research-writing  # 中英互译、润色\n```\n\n### 质量审校\n\n```bash\n/peer-review                  # 同行评审\n/quality-editor               # 质量编辑\n/humanizer-zh-academic        # 中文降重\n```\n\n### 输出生成\n\n```bash\n/docx                         # 生成Word文档\n/pptx                         # 生成PPT\n```\n\n---\n\n## 常见问题\n\n### Q: 模板和项目的关系？\n\nA: 模板是只读的，每次新论文复制一份到独立目录。\n\n### Q: 如何同时写多篇论文？\n\nA: 每篇论文一个独立目录，互不影响。\n\n### Q: 模板更新了怎么办？\n\nA: 新项目用新模板，旧项目继续用旧版本。\n\n### Q: 如何选择研究框架？\n\nA: 参考 `templates/case-study-example.md` 中的案例。\n\n---\n\n**祝你论文写作顺利！**\n"};
+
+        // 嵌入的模板文件内容
+        ;
+        let currentStep = 1;
+        let configFiles = {};
+
+        // localStorage 自动记忆功能
+        const STORAGE_KEY = 'mba-thesis-init-data';
+
+        // 保存表单数据到localStorage
+        function saveFormData() {
+            const data = {
+                project_name: document.getElementById('project_name')?.value || '',
+                title: document.getElementById('title')?.value || '',
+                title_en: document.getElementById('title_en')?.value || '',
+                author: document.getElementById('author')?.value || '',
+                student_id: document.getElementById('student_id')?.value || '',
+                school: document.getElementById('school')?.value || '',
+                college: document.getElementById('college')?.value || '',
+                supervisor: document.getElementById('supervisor')?.value || '',
+                supervisor_title: document.getElementById('supervisor_title')?.value || '',
+                research_direction: document.getElementById('research_direction')?.value || '',
+                completion_date: document.getElementById('completion_date')?.value || '',
+                research_type: document.getElementById('research_type')?.value || '案例研究',
+                primary_question: document.getElementById('primary_question')?.value || '',
+                sample_size: document.getElementById('sample_size')?.value || '150',
+                interview_count: document.getElementById('interview_count')?.value || '8',
+                word_count: document.getElementById('word_count')?.value || '30000',
+                plagiarism_system: document.getElementById('plagiarism_system')?.value || '知网',
+                plagiarism_threshold: document.getElementById('plagiarism_threshold')?.value || '15',
+                reference_style: document.getElementById('reference_style')?.value || 'GB/T 7714-2015',
+                method_custom: document.getElementById('method_custom')?.value || '',
+                // 复选框状态
+                methods: [],
+                frameworks: []
+            };
+            // 保存研究方法复选框
+            for (let i = 1; i <= 5; i++) {
+                const cb = document.getElementById('method' + i);
+                if (cb && cb.checked) data.methods.push(cb.value);
+            }
+            const methodCustomCheck = document.getElementById('method_custom_check');
+            if (methodCustomCheck) data.method_custom_check = methodCustomCheck.checked;
+            // 保存理论框架复选框
+            for (let i = 1; i <= 42; i++) {
+                const cb = document.getElementById('fw' + i);
+                if (cb && cb.checked) data.frameworks.push(cb.value);
+            }
+            const fwCustomCheck = document.getElementById('fw_custom_check');
+            if (fwCustomCheck) data.fw_custom_check = fwCustomCheck.checked;
+            data.fw_custom = document.getElementById('fw_custom')?.value || '';
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // 从localStorage恢复表单数据
+        function loadFormData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+            try {
+                const data = JSON.parse(saved);
+                // 恢复输入框
+                const fields = ['project_name', 'title', 'title_en', 'author', 'student_id', 'school', 'college', 'supervisor', 'supervisor_title', 'research_direction', 'completion_date', 'primary_question', 'sample_size', 'interview_count', 'plagiarism_threshold', 'method_custom'];
+                fields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && data[id]) el.value = data[id];
+                });
+                // 恢复下拉框
+                const selects = ['research_type', 'word_count', 'plagiarism_system', 'reference_style'];
+                selects.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && data[id]) el.value = data[id];
+                });
+                // 恢复研究方法复选框
+                if (data.methods) {
+                    data.methods.forEach(val => {
+                        for (let i = 1; i <= 5; i++) {
+                            const cb = document.getElementById('method' + i);
+                            if (cb && cb.value === val) cb.checked = true;
+                        }
+                    });
+                }
+                // 恢复自定义研究方法复选框状态
+                if (data.method_custom_check) {
+                    const customCheck = document.getElementById('method_custom_check');
+                    if (customCheck) {
+                        customCheck.checked = true;
+                        toggleCustomMethod();
+                    }
+                }
+                // 恢复理论框架复选框
+                if (data.frameworks) {
+                    data.frameworks.forEach(val => {
+                        for (let i = 1; i <= 42; i++) {
+                            const cb = document.getElementById('fw' + i);
+                            if (cb && cb.value === val) cb.checked = true;
+                        }
+                    });
+                }
+                // 恢复自定义理论框架复选框状态
+                if (data.fw_custom_check) {
+                    const customCheck = document.getElementById('fw_custom_check');
+                    if (customCheck) {
+                        customCheck.checked = true;
+                        toggleCustomFramework();
+                    }
+                }
+                // 恢复自定义理论框架输入
+                if (data.fw_custom) {
+                    const el = document.getElementById('fw_custom');
+                    if (el) el.value = data.fw_custom;
+                }
+            } catch (e) {
+                console.warn('Failed to load saved data:', e);
+            }
+        }
+
+        // 清除记忆的数据
+        function clearSavedData() {
+            if (confirm('确定要清除所有记忆的数据吗？')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        // 为所有输入框添加自动保存事件
+        function initAutoSave() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('change', saveFormData);
+                input.addEventListener('input', saveFormData);
+            });
+        }
+
+        // 页面加载时恢复数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFormData();
+            initAutoSave();
+        });
+
+        function nextStep(step) {
+            if (step === 4) {
+                updateSummary();
+            }
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.add('completed');
+            document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
+            
+            currentStep = step;
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
+            
+            currentStep = step;
+        }
+
+        function toggleCustomMethod() {
+            const cb = document.getElementById('method_custom_check');
+            document.getElementById('custom_method_div').style.display = cb.checked ? 'block' : 'none';
+        }
+
+        function toggleCustomFramework() {
+            const cb = document.getElementById('fw_custom_check');
+            document.getElementById('custom_framework_div').style.display = cb.checked ? 'block' : 'none';
+        }
+
+        function getCheckedValues(name) {
+            const checkboxes = document.querySelectorAll(`input[value]:checked`);
+            const values = [];
+            checkboxes.forEach(cb => {
+                if (cb.id.startsWith(name) && !cb.id.endsWith('_custom_check')) {
+                    values.push(cb.value);
+                }
+            });
+            // 处理自定义研究方法
+            if (name === 'method') {
+                const customInput = document.getElementById('method_custom');
+                if (customInput && customInput.value.trim()) {
+                    const customMethods = customInput.value.split(',').map(s => s.trim()).filter(s => s);
+                    values.push(...customMethods);
+                }
+            }
+            // 处理自定义理论框架
+            if (name === 'fw') {
+                const customInput = document.getElementById('fw_custom');
+                if (customInput && customInput.value.trim()) {
+                    const customFrameworks = customInput.value.split(',').map(s => s.trim()).filter(s => s);
+                    values.push(...customFrameworks);
+                }
+            }
+            return values;
+        }
+
+        function updateSummary() {
+            const projectName = document.getElementById('project_name').value || '未填写';
+            const title = document.getElementById('title').value || '未填写';
+            const author = document.getElementById('author').value || '未填写';
+            const studentId = document.getElementById('student_id').value || '未填写';
+            const school = document.getElementById('school').value || '未填写';
+            const supervisor = document.getElementById('supervisor').value || '未填写';
+            const researchType = document.getElementById('research_type').value;
+            const wordCount = document.getElementById('word_count').options[document.getElementById('word_count').selectedIndex].text;
+            const plagiarismSystem = document.getElementById('plagiarism_system').value;
+
+            document.getElementById('summary').innerHTML = `
+                <h3>配置信息确认</h3>
+                <div class="summary-item">
+                    <div class="summary-label">项目名称</div>
+                    <div class="summary-value">${projectName}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">论文题目</div>
+                    <div class="summary-value">${title}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">作者姓名</div>
+                    <div class="summary-value">${author}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">学号</div>
+                    <div class="summary-value">${studentId}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">学校</div>
+                    <div class="summary-value">${school}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">导师</div>
+                    <div class="summary-value">${supervisor}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">研究类型</div>
+                    <div class="summary-value">${researchType}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">字数要求</div>
+                    <div class="summary-value">${wordCount}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">查重系统</div>
+                    <div class="summary-value">${plagiarismSystem}</div>
+                </div>
+            `;
+        }
+
+        function generateConfig() {
+            const now = new Date().toLocaleString('zh-CN');
+            
+            // 获取表单数据
+            const data = {
+                project_name: document.getElementById('project_name').value || '',
+                title: document.getElementById('title').value || '',
+                title_en: document.getElementById('title_en').value || '',
+                author: document.getElementById('author').value || '',
+                student_id: document.getElementById('student_id').value || '',
+                school: document.getElementById('school').value || '',
+                college: document.getElementById('college').value || '',
+                supervisor: document.getElementById('supervisor').value || '',
+                supervisor_title: document.getElementById('supervisor_title').value || '',
+                research_direction: document.getElementById('research_direction').value || '',
+                completion_date: document.getElementById('completion_date').value || '',
+                research_type: document.getElementById('research_type').value,
+                methods: getCheckedValues('method'),
+                frameworks: getCheckedValues('fw'),
+                primary_question: document.getElementById('primary_question').value || '',
+                sample_size: document.getElementById('sample_size').value || '150',
+                interview_count: document.getElementById('interview_count').value || '8',
+                word_count: document.getElementById('word_count').value,
+                plagiarism_system: document.getElementById('plagiarism_system').value,
+                plagiarism_threshold: document.getElementById('plagiarism_threshold').value || '15',
+                reference_style: document.getElementById('reference_style').value
+            };
+
+            // 更新成功消息
+            document.getElementById('successMessageText').textContent = 
+                `项目目录：${data.project_name || 'your-project-name'}/config/`;
+
+            // 生成 thesis-config.yaml
+            configFiles['thesis-config.yaml'] = `# 论文核心配置文件
+# 生成时间：${now}
+
+# 论文元数据
+metadata:
+  title: "${data.title}"
+  title_en: "${data.title_en}"
+  author: "${data.author}"
+  student_id: "${data.student_id}"
+  school: "${data.school}"
+  college: "${data.college}"
+  program: "MBA"
+  supervisor: "${data.supervisor}"
+  supervisor_title: "${data.supervisor_title}"
+  research_direction: "${data.research_direction}"
+  completion_date: "${data.completion_date}"
+
+# 研究问题
+research_questions:
+  primary: "${data.primary_question}"
+  secondary:
+    - ""
+
+# 关键词
+keywords:
+  chinese:
+    - ""
+    - ""
+    - ""
+  english:
+    - ""
+    - ""
+    - ""
+
+# 研究方法
+methodology:
+  type: "${data.research_type}"
+  methods: [${data.methods.map(m => `"${m}"`).join(', ')}]
+  sample_size: ${data.sample_size}
+  interview_count: ${data.interview_count}
+  data_collection_period: ""
+
+# 研究对象
+research_subject:
+  name: ""
+  industry: ""
+  scale: ""
+  location: ""
+
+# 论文结构
+structure:
+  chapter_count: 5
+  chapters:
+    - number: 1
+      title: "绪论"
+    - number: 2
+      title: "相关理论与文献综述"
+    - number: 3
+      title: "现状分析"
+    - number: 4
+      title: "策略优化"
+    - number: 5
+      title: "结论与展望"
+
+# 写作进度
+progress:
+  setup: "completed"
+  literature: "not_started"
+  framework: "not_started"
+  data_collection: "not_started"
+  writing: "not_started"
+  review: "not_started"
+  defense: "not_started"
+`;
+
+            // 生成 school-format.yaml
+            configFiles['school-format.yaml'] = `# 学校格式规范配置文件
+# 生成时间：${now}
+
+# 学校信息
+school:
+  name: "${data.school}"
+  college: "${data.college}"
+
+# 字体格式
+format:
+  font:
+    title: "黑体"
+    subtitle: "黑体"
+    body: "宋体"
+    english: "Times New Roman"
+  size:
+    title: 16
+    subtitle: 14
+    body: 12
+  spacing:
+    line: 1.5
+  margin:
+    top: 2.54
+    bottom: 2.54
+    left: 3.17
+    right: 3.17
+
+# 字数要求
+word_count:
+  total: ${data.word_count}
+  chapters:
+    introduction: 3000
+    literature: 6000
+    analysis: 8000
+    strategy: 8000
+    conclusion: 2000
+
+# 查重要求
+plagiarism_check:
+  threshold: ${data.plagiarism_threshold}
+  system: "${data.plagiarism_system}"
+
+# 参考文献格式
+reference_format:
+  style: "${data.reference_style}"
+  count:
+    total: 50
+    chinese: 30
+    english: 20
+`;
+
+            // 生成 research-framework.yaml
+            configFiles['research-framework.yaml'] = `# 研究框架配置文件
+# 生成时间：${now}
+
+# 理论框架
+theoretical_framework:
+${data.frameworks.map(f => `  - name: "${f}"
+    description: ""
+    application: ""
+    key_references:
+      - ""
+    chapter_applied: []`).join('\n')}
+
+# 外部分析工具
+external_analysis:
+  - name: "PEST"
+    enabled: ${data.frameworks.includes('PEST分析') ? 'true' : 'false'}
+    focus_areas: []
+  - name: "Porter_Five_Forces"
+    enabled: ${data.frameworks.includes('波特五力模型') ? 'true' : 'false'}
+    focus_areas: []
+
+# 内部分析工具
+internal_analysis:
+  - name: "SWOT"
+    enabled: ${data.frameworks.includes('SWOT分析') ? 'true' : 'false'}
+    focus_areas: []
+
+# 市场分析工具
+market_analysis:
+  - name: "STP"
+    enabled: ${data.frameworks.includes('STP理论') ? 'true' : 'false'}
+    dimensions: []
+
+# 策略工具
+strategy_tools:
+  - name: "4C"
+    enabled: ${data.frameworks.includes('4C营销理论') ? 'true' : 'false'}
+    dimensions: []
+  - name: "4P"
+    enabled: ${data.frameworks.includes('4P营销理论') ? 'true' : 'false'}
+    dimensions: []
+
+# 研究框架图
+framework_diagram:
+  type: "flowchart"
+  layers: []
+`;
+
+            // 生成 defense-config.yaml
+            configFiles['defense-config.yaml'] = `# 答辩准备配置文件
+# 生成时间：${now}
+
+# 答辩PPT配置
+ppt:
+  total_slides: 20
+  presentation_time: 15
+  structure:
+    - section: "封面"
+      slides: 1
+    - section: "目录"
+      slides: 1
+    - section: "研究背景与问题"
+      slides: 3
+    - section: "研究方法与数据"
+      slides: 2
+    - section: "核心发现"
+      slides: 5
+    - section: "策略方案"
+      slides: 4
+    - section: "研究结论"
+      slides: 2
+    - section: "局限性与展望"
+      slides: 1
+    - section: "致谢"
+      slides: 1
+
+# 答辩准备
+defense_preparation:
+  timeline_weeks: 6
+  mock_sessions: 3
+  common_questions:
+    - category: "澄清类问题"
+      examples:
+        - "请解释一下你的研究问题"
+        - "为什么选择这个理论框架？"
+    - category: "方法论质疑"
+      examples:
+        - "样本量是否足够？"
+        - "如何保证问卷的信效度？"
+    - category: "实践价值问题"
+      examples:
+        - "你的研究对企业有什么实际意义？"
+        - "如何保证策略的可操作性？"
+    - category: "理论贡献问题"
+      examples:
+        - "你的研究有什么理论创新？"
+        - "与现有研究相比有什么突破？"
+    - category: "局限性问题"
+      examples:
+        - "研究有什么局限性？"
+        - "未来研究方向是什么？"
+`;
+
+            // 显示成功消息
+            document.getElementById('step4').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // 显示第一个文件内容
+            document.getElementById('outputContent').textContent = configFiles['thesis-config.yaml'];
+            document.getElementById('outputContainer').style.display = 'block';
+        }
+
+        function downloadFile(filename) {
+            const content = configFiles[filename];
+            const blob = new Blob([content], { type: 'text/yaml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadAll() {
+            Object.keys(configFiles).forEach(filename => {
+                setTimeout(() => downloadFile(filename), 100);
+            });
+        }
+
+        async function fetchFile(path) {
+            try {
+                const resp = await fetch(path);
+                if (resp.ok) {
+                    return await resp.text();
+                }
+                console.warn(`Failed to fetch ${path}: ${resp.status}`);
+                return null;
+            } catch (e) {
+                console.warn(`Error fetching ${path}:`, e);
+                return null;
+            }
+        }
+
+        async function downloadProjectZip() {
+            const projectName = document.getElementById('project_name').value || 'my-mba-thesis';
+            
+            const zip = new JSZip();
+            const folder = zip.folder(projectName);
+
+            // 添加配置文件
+            folder.file("config/thesis-config.yaml", configFiles['thesis-config.yaml']);
+            folder.file("config/school-format.yaml", configFiles['school-format.yaml']);
+            folder.file("config/research-framework.yaml", configFiles['research-framework.yaml']);
+            folder.file("config/defense-config.yaml", configFiles['defense-config.yaml']);
+
+            // 添加嵌入的模板文件
+            for (const [path, content] of Object.entries(TEMPLATE_FILES)) {
+                folder.file(path, content);
+            }
+
+            // 创建空目录
+            folder.file("drafts/.gitkeep", "");
+            folder.file("reviews/.gitkeep", "");
+            folder.file("output/.gitkeep", "");
+            folder.file("sources/Classic/.gitkeep", "");
+            folder.file("sources/KeyTexts/.gitkeep", "");
+            folder.file("sources/Supporting/.gitkeep", "");
+
+            // 生成并下载ZIP
+            const content = await zip.generateAsync({ type: "blob" });
+            const url = URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectName}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadInitScript() {
+            const data = {
+                project_name: document.getElementById('project_name').value || 'my-mba-thesis',
+                title: document.getElementById('title').value || '',
+                title_en: document.getElementById('title_en').value || '',
+                author: document.getElementById('author').value || '',
+                student_id: document.getElementById('student_id').value || '',
+                school: document.getElementById('school').value || '',
+                college: document.getElementById('college').value || '',
+                supervisor: document.getElementById('supervisor').value || '',
+                supervisor_title: document.getElementById('supervisor_title').value || '',
+                research_direction: document.getElementById('research_direction').value || '',
+                completion_date: document.getElementById('completion_date').value || '',
+                research_type: document.getElementById('research_type').value,
+                methods: getCheckedValues('method'),
+                frameworks: getCheckedValues('fw'),
+                primary_question: document.getElementById('primary_question').value || '',
+                sample_size: document.getElementById('sample_size').value || '150',
+                interview_count: document.getElementById('interview_count').value || '8',
+                word_count: document.getElementById('word_count').value,
+                plagiarism_system: document.getElementById('plagiarism_system').value,
+                plagiarism_threshold: document.getElementById('plagiarism_threshold').value || '15',
+                reference_style: document.getElementById('reference_style').value
+            };
+
+            // 构建脚本内容（避免模板字符串的变量替换问题）
+            let script = '#!/bin/bash\n';
+            script += '# MBA论文项目初始化脚本\n';
+            script += '# 生成时间：' + new Date().toLocaleString('zh-CN') + '\n\n';
+            script += 'set -e\n\n';
+            script += '# 颜色定义\n';
+            script += "GREEN='\\033[0;32m'\n";
+            script += "BLUE='\\033[0;34m'\n";
+            script += "NC='\\033[0m'\n\n";
+            script += '# 项目名称\n';
+            script += 'PROJECT_NAME="' + data.project_name + '"\n\n';
+            script += 'echo -e "${BLUE}========================================${NC}"\n';
+            script += 'echo -e "${GREEN}MBA论文项目初始化${NC}"\n';
+            script += 'echo -e "${BLUE}========================================${NC}"\n';
+            script += 'echo ""\n';
+            script += 'echo "项目名称：$PROJECT_NAME"\n';
+            script += 'echo ""\n\n';
+            script += '# 获取脚本所在目录\n';
+            script += 'SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"\n';
+            script += 'TEMPLATE_DIR="$SCRIPT_DIR"\n\n';
+            script += '# 创建新项目目录\n';
+            script += 'NEW_PROJECT_DIR="$SCRIPT_DIR/$PROJECT_NAME"\n\n';
+            script += 'if [ -d "$NEW_PROJECT_DIR" ]; then\n';
+            script += '    echo "警告：目录 $NEW_PROJECT_DIR 已存在"\n';
+            script += '    read -p "是否覆盖？(y/n): " confirm\n';
+            script += '    if [ "$confirm" != "y" ]; then\n';
+            script += '        echo "已取消"\n';
+            script += '        exit 0\n';
+            script += '    fi\n';
+            script += '    rm -rf "$NEW_PROJECT_DIR"\n';
+            script += 'fi\n\n';
+            script += '# 复制模板\n';
+            script += 'echo -e "${BLUE}创建项目目录...${NC}"\n';
+            script += 'cp -r "$TEMPLATE_DIR" "$NEW_PROJECT_DIR"\n\n';
+            script += '# 删除初始化脚本（不需要保留在项目中）\n';
+            script += 'rm -f "$NEW_PROJECT_DIR/init-project.sh"\n';
+            script += 'rm -f "$NEW_PROJECT_DIR/init.html"\n';
+            script += 'rm -f "$NEW_PROJECT_DIR/init.sh"\n\n';
+            script += '# 生成配置文件\n';
+            script += 'echo -e "${BLUE}生成配置文件...${NC}"\n';
+            script += 'mkdir -p "$NEW_PROJECT_DIR/config"\n\n';
+
+            // 写入配置文件
+            script += '# 生成 thesis-config.yaml\n';
+            script += "cat > \"$NEW_PROJECT_DIR/config/thesis-config.yaml\" << 'ENDOFFILE'\n";
+            script += configFiles['thesis-config.yaml'] + '\n';
+            script += 'ENDOFFILE\n\n';
+
+            script += '# 生成 school-format.yaml\n';
+            script += "cat > \"$NEW_PROJECT_DIR/config/school-format.yaml\" << 'ENDOFFILE'\n";
+            script += configFiles['school-format.yaml'] + '\n';
+            script += 'ENDOFFILE\n\n';
+
+            script += '# 生成 research-framework.yaml\n';
+            script += "cat > \"$NEW_PROJECT_DIR/config/research-framework.yaml\" << 'ENDOFFILE'\n";
+            script += configFiles['research-framework.yaml'] + '\n';
+            script += 'ENDOFFILE\n\n';
+
+            script += '# 生成 defense-config.yaml\n';
+            script += "cat > \"$NEW_PROJECT_DIR/config/defense-config.yaml\" << 'ENDOFFILE'\n";
+            script += configFiles['defense-config.yaml'] + '\n';
+            script += 'ENDOFFILE\n\n';
+
+            script += '# 创建必要的目录\n';
+            script += 'mkdir -p "$NEW_PROJECT_DIR/drafts"\n';
+            script += 'mkdir -p "$NEW_PROJECT_DIR/reviews"\n';
+            script += 'mkdir -p "$NEW_PROJECT_DIR/output"\n';
+            script += 'mkdir -p "$NEW_PROJECT_DIR/sources/Classic"\n';
+            script += 'mkdir -p "$NEW_PROJECT_DIR/sources/KeyTexts"\n';
+            script += 'mkdir -p "$NEW_PROJECT_DIR/sources/Supporting"\n\n';
+
+            script += 'echo ""\n';
+            script += 'echo -e "${GREEN}========================================${NC}"\n';
+            script += 'echo -e "${GREEN}项目创建成功！${NC}"\n';
+            script += 'echo -e "${GREEN}========================================${NC}"\n';
+            script += 'echo ""\n';
+            script += 'echo "项目目录：$NEW_PROJECT_DIR"\n';
+            script += 'echo ""\n';
+            script += 'echo "后续步骤："\n';
+            script += 'echo "  1. cd $PROJECT_NAME"\n';
+            script += 'echo "  2. cat workflows/00-setup.md"\n';
+            script += 'echo "  3. 按照工作流文档逐步推进"\n';
+            script += 'echo ""\n';
+            script += 'echo -e "${BLUE}祝你论文写作顺利！${NC}"\n';
+
+            const blob = new Blob([script], { type: 'text/x-shellscript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'init-project.sh';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

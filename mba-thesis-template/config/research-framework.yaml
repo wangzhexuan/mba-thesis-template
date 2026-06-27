@@ -1,0 +1,217 @@
+# ============================================================
+# 研究框架配置文件
+# ============================================================
+# 用途：定义MBA应用型案例论文使用的理论框架、分析工具、研究模型
+# 使用方式：根据研究设计选择并配置，写作时参考
+# ============================================================
+
+# ------------------------------------------------------------
+# 理论框架
+# ------------------------------------------------------------
+# 说明：列出本研究使用的主要理论及其应用
+theoretical_framework:
+  # 理论1（根据实际填写）
+  - name: ""                          # 理论名称（如：STP理论）
+    description: ""                   # 理论简述
+    application: ""                   # 在本研究中的应用方式
+    key_references:                   # 关键参考文献
+      - ""
+    chapter_applied: []               # 应用于哪些章节（如：[3, 4]）
+
+  # 理论2
+  - name: ""
+    description: ""
+    application: ""
+    key_references:
+      - ""
+    chapter_applied: []
+
+  # 理论3（可继续添加）
+  - name: ""
+    description: ""
+    application: ""
+    key_references:
+      - ""
+    chapter_applied: []
+
+# ------------------------------------------------------------
+# 分析工具
+# ------------------------------------------------------------
+# 说明：配置使用的分析工具。MBA案例论文以“工具适配问题”为原则，避免模型堆砌。
+
+# 外部环境分析
+external_analysis:
+  - name: "PEST"                      # PEST宏观环境分析
+    enabled: true                     # 是否启用
+    focus_areas:                      # 重点关注领域
+      - "政策环境"
+      - "经济环境"
+      - "社会环境"
+      - "技术环境"
+
+  - name: "Porter_Five_Forces"        # 波特五力模型；仅在研究行业结构和竞争强度时启用
+    enabled: false
+    focus_areas:
+      - "供应商议价能力"
+      - "购买者议价能力"
+      - "新进入者威胁"
+      - "替代品威胁"
+      - "行业内竞争"
+
+  - name: "Industry_Lifecycle"        # 产业生命周期
+    enabled: false
+    focus_areas: []
+
+# 内部环境分析
+internal_analysis:
+  - name: "SWOT"                      # SWOT分析
+    enabled: true
+    focus_areas:
+      - "优势（Strengths）"
+      - "劣势（Weaknesses）"
+      - "机会（Opportunities）"
+      - "威胁（Threats）"
+
+  - name: "Value_Chain"               # 价值链分析
+    enabled: false
+    focus_areas: []
+
+  - name: "Resource-Based_View"       # 资源基础观
+    enabled: false
+    focus_areas: []
+
+# 市场分析；营销管理类论文通常与策略章节直接衔接
+market_analysis:
+  - name: "STP"                       # 市场细分、目标市场、市场定位
+    enabled: true
+    dimensions:                       # 细分维度
+      - "地理细分"
+      - "人口统计细分"
+      - "心理细分"
+      - "行为细分"
+
+  - name: "Customer_Journey"          # 客户旅程地图
+    enabled: false
+    dimensions: []
+
+# 营销策略；根据研究对象选择一种主框架，避免4P/4C/7P并列堆砌
+strategy_tools:
+  - name: "4P"                        # 产品、价格、渠道、促销
+    enabled: false
+    dimensions: []
+
+  - name: "4C"                        # 顾客、成本、便利、沟通
+    enabled: true
+    dimensions:
+      - "顾客需求与欲望"
+      - "顾客成本"
+      - "便利性"
+      - "沟通"
+
+  - name: "7P"                        # 服务营销组合
+    enabled: false
+    dimensions: []
+
+  - name: "CRM"                       # 客户关系管理
+    enabled: false
+    dimensions: []
+
+# 绩效管理（适用于运营管理类论文）
+performance_tools:
+  - name: "BSC"                       # 平衡计分卡
+    enabled: false
+    perspectives:
+      - "财务维度"
+      - "客户维度"
+      - "内部流程维度"
+      - "学习与成长维度"
+
+  - name: "KPI"                       # 关键绩效指标
+    enabled: false
+    categories: []
+
+  - name: "PDCA"                      # PDCA循环
+    enabled: false
+    stages: []
+
+# ------------------------------------------------------------
+# 研究框架图设计
+# ------------------------------------------------------------
+framework_diagram:
+  # 框架图类型
+  type: "flowchart"                   # flowchart / mindmap / hierarchical
+
+  # 框架层级描述（用于生成研究框架图）
+  layers:
+    - level: 1
+      name: "研究问题"
+      description: "明确核心研究问题"
+    - level: 2
+      name: "理论基础"
+      description: "选择适配案例问题的成熟理论工具"
+    - level: 3
+      name: "现状分析"
+      description: "案例现状、外部环境、竞争对标与调研分析"
+    - level: 4
+      name: "问题诊断"
+      description: "识别核心问题与原因"
+    - level: 5
+      name: "策略设计"
+      description: "提出可执行的优化策略方案"
+    - level: 6
+      name: "实施保障"
+      description: "保障措施、权限边界与效果评估"
+
+  # 技术路线图要素
+  technical_route:
+    start: "研究背景与问题提出"
+    process:
+      - "文献综述与理论工具选择"
+      - "研究设计与方法选择"
+      - "数据收集与分析"
+      - "问题诊断与策略设计"
+      - "实施保障与效果评估"
+    end: "研究结论、管理启示与局限"
+
+# ------------------------------------------------------------
+# 数据分析方法；应用型MBA论文以支撑问题诊断为目标，不强制追求复杂统计模型
+# ------------------------------------------------------------
+data_analysis:
+  # 定量分析方法
+  quantitative:
+    - name: "描述性统计"
+      enabled: true
+      tools: ["SPSS", "Excel"]
+    - name: "信度分析"
+      enabled: true
+      tools: ["SPSS"]
+    - name: "效度或题项合理性说明"
+      enabled: true
+      tools: ["SPSS"]
+    - name: "相关分析"
+      enabled: false
+      tools: ["SPSS"]
+    - name: "回归分析"
+      enabled: false
+      tools: ["SPSS"]
+
+  # 定性分析方法
+  qualitative:
+    - name: "内容分析法"
+      enabled: true
+      tools: ["NVivo", "手工编码"]
+    - name: "主题分析法"
+      enabled: true
+      tools: ["手工编码"]
+    - name: "扎根理论"
+      enabled: false
+      tools: ["NVivo"]
+
+  # 数据可视化
+  visualization:
+    - name: "统计图表"
+      tools: ["Excel", "Python"]
+    - name: "词云图"
+      tools: ["Python"]
+    - name: "框架图"
+      tools: ["draw.io", "ProcessOn"]

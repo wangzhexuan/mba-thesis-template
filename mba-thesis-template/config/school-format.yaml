@@ -1,0 +1,166 @@
+# ============================================================
+# 学校格式规范配置文件
+# ============================================================
+# 用途：存储学校对MBA论文的格式要求
+# 使用方式：根据学校要求填写，build_thesis.py脚本读取此配置
+# ============================================================
+
+# ------------------------------------------------------------
+# 学校信息
+# ------------------------------------------------------------
+school:
+  name: ""                            # 学校全称（如：厦门大学）
+  english_name: ""                    # 学校英文名称
+  college: ""                         # 学院名称
+  logo_path: ""                       # 校徽图片路径（可选）
+
+# ------------------------------------------------------------
+# 字体格式
+# ------------------------------------------------------------
+format:
+  font:
+    title: "黑体"                     # 一级标题字体
+    subtitle: "黑体"                  # 二级标题字体
+    sub_subtitle: "黑体"              # 三级标题字体
+    body: "宋体"                      # 正文字体
+    english: "Times New Roman"        # 英文及数字字体
+    abstract: "宋体"                  # 摘要字体
+    keywords: "宋体"                  # 关键词字体
+    reference: "宋体"                 # 参考文献字体
+    appendix: "宋体"                  # 附录字体
+    table_title: "宋体"              # 表格标题字体
+    figure_title: "宋体"             # 图片标题字体
+    header: "宋体"                    # 页眉字体
+    footer: "宋体"                    # 页脚字体
+
+  # 字号设置（单位：磅）
+  size:
+    title: 16                         # 一级标题字号
+    subtitle: 14                      # 二级标题字号
+    sub_subtitle: 12                  # 三级标题字号
+    body: 12                          # 正文字号（小四）
+    abstract_title: 16               # 摘要标题字号
+    abstract_body: 12                # 摘要正文字号
+    keywords: 12                     # 关键词字号
+    table: 10.5                      # 表格内容字号
+    figure_title: 10.5              # 图表标题字号
+    header: 9                        # 页眉字号
+    footer: 9                        # 页脚字号
+
+  # 间距设置
+  spacing:
+    line: 1.5                         # 行距（倍数）
+    paragraph_before: 0              # 段前间距（磅）
+    paragraph_after: 0               # 段后间距（磅）
+    title_before: 12                 # 标题段前间距（磅）
+    title_after: 6                   # 标题段后间距（磅）
+
+  # 页面边距（单位：厘米）
+  margin:
+    top: 2.54                         # 上边距
+    bottom: 2.54                      # 下边距
+    left: 3.17                        # 左边距（装订侧）
+    right: 3.17                       # 右边距
+    header_distance: 1.5             # 页眉距边界
+    footer_distance: 1.75            # 页脚距边界
+
+  # 页面设置
+  page:
+    size: "A4"                        # 纸张大小
+    orientation: "portrait"          # 纸张方向
+    columns: 1                        # 分栏数
+
+# ------------------------------------------------------------
+# 字数要求
+# ------------------------------------------------------------
+word_count:
+  total: 30000                        # 总字数要求
+  min: 25000                          # 最低字数
+  max: 35000                          # 最高字数
+
+  # 各章字数建议（可根据实际情况调整）
+  chapters:
+    introduction: 3000                # 第一章：绪论
+    literature: 6000                  # 第二章：文献综述
+    analysis: 8000                    # 第三章：现状分析
+    strategy: 8000                    # 第四章：策略优化
+    conclusion: 2000                  # 第五章：结论
+    implementation: 6000              # 第六章：实施保障（六章制）
+
+  # 摘要字数
+  abstract:
+    chinese: 500                      # 中文摘要字数
+    english: 300                      # 英文摘要词数
+
+# ------------------------------------------------------------
+# 查重要求
+# ------------------------------------------------------------
+plagiarism_check:
+  threshold: 15                       # 查重率阈值（%）
+  system: "知网"                       # 查重系统：知网/万方/维普
+  exclude_references: true            # 是否排除参考文献
+  exclude_citations: true             # 是否排除引用部分
+
+# ------------------------------------------------------------
+# 参考文献格式
+# ------------------------------------------------------------
+reference_format:
+  # 引用格式标准
+  style: "GB/T 7714-2015"             # GB/T 7714-2015 / APA / MLA / Chicago
+
+  # 文献数量要求
+  count:
+    total: 50                         # 总参考文献数量
+    chinese: 30                       # 中文文献数量
+    english: 20                       # 英文文献数量
+    recent: 20                        # 近5年文献数量
+
+  # 文献来源数据库
+  databases:
+    chinese:
+      - "CNKI（中国知网）"
+      - "万方数据"
+      - "维普期刊"
+    english:
+      - "Web of Science"
+      - "Scopus"
+      - "Google Scholar"
+
+  # 文献类型分布建议
+  distribution:
+    journal: 60                       # 期刊论文（%）
+    book: 20                          # 著作（%）
+    conference: 10                    # 会议论文（%）
+    other: 10                         # 其他（%）
+
+# ------------------------------------------------------------
+# 图表格式
+# ------------------------------------------------------------
+figures:
+  # 图片格式
+  format: "png"                       # 图片格式：png/jpg/svg
+  dpi: 300                            # 图片分辨率
+  max_width: 14                       # 最大宽度（cm）
+
+  # 图表编号
+  numbering: "chapter"                # 编号方式：chapter（按章）/ continuous（连续）
+
+  # 图表标题位置
+  figure_title_position: "below"      # 图片标题位置：below/above
+  table_title_position: "above"       # 表格标题位置：below/above
+
+# ------------------------------------------------------------
+# 封面格式
+# ------------------------------------------------------------
+cover:
+  # 封面元素
+  show_school_logo: true              # 显示校徽
+  show_school_name: true              # 显示学校名称
+  show_thesis_type: true              # 显示论文类型
+  show_title: true                    # 显示论文题目
+  show_author_info: true              # 显示作者信息
+  show_date: true                     # 显示日期
+
+  # 封面布局
+  title_font_size: 22                 # 题目字号
+  info_font_size: 14                  # 信息字号

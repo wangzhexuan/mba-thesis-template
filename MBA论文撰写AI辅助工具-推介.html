@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBA论文撰写AI辅助工具 · 一看就懂</title>
+<style>
+  :root{
+    --bg:#0e1020; --ink:#1a1c2e; --muted:#5b6072; --line:#e6e8f0;
+    --card:#ffffff; --soft:#f6f7fb;
+    --a1:#6d5efc; --a2:#a855f7; --a3:#22c1a6; --warn:#f59e0b;
+    --accent:linear-gradient(120deg,#6d5efc 0%,#a855f7 100%);
+    --shadow:0 18px 50px -18px rgba(40,30,120,.35);
+    --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,-apple-system,Segoe UI,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#070815;font-family:var(--font);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+  /* stage scales to viewport while keeping 16:9 */
+  #stage{position:relative;width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh;
+    background:var(--soft);overflow:hidden;box-shadow:0 0 0 100vmax #070815}
+  .slide{position:absolute;inset:0;padding:5.2% 6.4%;
+    display:none;flex-direction:column;justify-content:center;
+    animation:fade .45s ease both}
+  .slide.on{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  h1{font-size:3.6vw;line-height:1.16;letter-spacing:-.5px}
+  h2{font-size:2.5vw;line-height:1.2;letter-spacing:-.3px;margin-bottom:2.2vh}
+  h2 .k{display:inline-block;font-size:1.05vw;font-weight:800;letter-spacing:2px;
+    color:#7c6cff;background:#efeaff;padding:.5vh 1vw;border-radius:999px;margin-bottom:1.4vh}
+  p,li,td,th{font-size:1.46vw;line-height:1.62;color:var(--ink)}
+  .muted{color:var(--muted)}
+  .accent-text{background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* cover */
+  .cover{background:radial-gradient(120% 130% at 78% 8%,#241a55 0%,#12132a 46%,#0b0c1d 100%);color:#fff}
+  .cover h1{font-size:4.2vw;color:#fff}
+  .cover .lead{font-size:1.7vw;color:#c9c6ee;margin-top:2.4vh;max-width:78%;line-height:1.6}
+  .cover .idea{margin-top:3.4vh;font-size:1.6vw;font-weight:700}
+  .chips{display:flex;flex-wrap:wrap;gap:.9vw;margin-top:3.4vh}
+  .chip{font-size:1.18vw;font-weight:700;color:#e9e7ff;border:1px solid rgba(255,255,255,.22);
+    background:rgba(255,255,255,.06);padding:.85vh 1.3vw;border-radius:999px;backdrop-filter:blur(4px)}
+  .chip b{color:#b9a9ff}
+  .eyebrow{font-size:1.1vw;letter-spacing:4px;font-weight:800;color:#8b7bff;text-transform:uppercase}
+
+  /* grids & cards */
+  .grid{display:grid;gap:1.6vw}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:2.2vh 1.6vw;box-shadow:var(--shadow)}
+  .card .n{font-size:1vw;font-weight:800;color:#fff;background:var(--accent);
+    width:2.4vw;height:2.4vw;min-width:34px;min-height:34px;border-radius:10px;
+    display:inline-flex;align-items:center;justify-content:center;margin-bottom:1.2vh}
+  .card h3{font-size:1.5vw;margin-bottom:.7vh}
+  .card p{font-size:1.18vw;color:var(--muted);line-height:1.55}
+
+  /* timeline */
+  .flow{display:grid;grid-template-columns:repeat(7,1fr);gap:.7vw;margin-top:1vh}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.6vh .7vw;
+    box-shadow:var(--shadow);position:relative}
+  .step .p{font-size:.95vw;font-weight:800;color:#7c6cff;letter-spacing:1px}
+  .step .t{font-size:1.04vw;font-weight:700;margin:.5vh 0;line-height:1.25}
+  .step .o{font-size:.86vw;color:var(--muted);line-height:1.4}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:14px;overflow:hidden;
+    box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:1.5vh 1.3vw;border-bottom:1px solid var(--line);font-size:1.24vw;vertical-align:top}
+  th{background:#f0eefb;font-weight:800;color:#3a3550;font-size:1.1vw;letter-spacing:.5px}
+  tr:last-child td{border-bottom:none}
+  td.good{color:#119b78;font-weight:700}
+  td.term{font-weight:800;color:#5b3fd6;white-space:nowrap}
+  .vs td:nth-child(2){color:#9aa0b4}
+  .vs td:nth-child(3){color:#1a1c2e;font-weight:600}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;background:#eef0f7;
+    padding:.1em .45em;border-radius:6px;font-size:.92em;color:#5b3fd6}
+
+  ul.clean{list-style:none}
+  ul.clean li{position:relative;padding-left:1.7vw;margin:1.3vh 0;font-size:1.34vw}
+  ul.clean li::before{content:"";position:absolute;left:0;top:.62em;width:.7vw;height:.7vw;
+    border-radius:50%;background:var(--accent)}
+
+  /* hero stat */
+  .stat{display:flex;align-items:center;gap:2.4vw;margin-top:1.6vh}
+  .bigstat{font-size:5vw;font-weight:900;line-height:1;letter-spacing:-2px}
+  .bigstat .from{color:#c2697a}.bigstat .to{color:#17a98a}
+  .arrow{font-size:3vw;color:#b9b3cf}
+  .statside li{font-size:1.28vw}
+
+  .steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4vw;margin-top:1vh}
+  .s3{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:2.4vh 1.5vw;box-shadow:var(--shadow)}
+  .s3 .num{font-size:2.4vw;font-weight:900;background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .s3 code{display:block;margin-top:1.2vh;background:#0f1020;color:#c8c2ff;padding:1.2vh 1vw;border-radius:10px;font-size:.95vw;line-height:1.5}
+
+  /* closing */
+  .closing{background:radial-gradient(120% 130% at 20% 90%,#241a55 0%,#12132a 46%,#0b0c1d 100%);color:#fff;text-align:center;align-items:center}
+  .closing h2{font-size:2.8vw;color:#fff;max-width:84%;line-height:1.35}
+  .closing .sig{margin-top:3vh;font-size:1.5vw;color:#b9a9ff;font-weight:700}
+
+  .foot{position:absolute;left:6.4%;bottom:3.2vh;font-size:.95vw;color:#9aa0b4;letter-spacing:.5px}
+  .cover .foot,.closing .foot{color:rgba(255,255,255,.5)}
+
+  /* chrome */
+  #bar{position:absolute;left:0;top:0;height:5px;background:var(--accent);width:0;z-index:30;transition:width .4s}
+  #dots{position:absolute;right:2vw;bottom:2.4vh;display:flex;gap:.6vw;z-index:30}
+  .dot{width:.7vw;height:.7vw;min-width:9px;min-height:9px;border-radius:50%;background:#cdd0dd;cursor:pointer;border:none;transition:.25s}
+  .dot.on{background:#7c6cff;transform:scale(1.35)}
+  .cover .dot,.closing .dot{background:rgba(255,255,255,.3)} .cover .dot.on,.closing .dot.on{background:#b9a9ff}
+  #count{position:absolute;left:2vw;bottom:2.4vh;font-size:1vw;color:#9aa0b4;font-weight:700;z-index:30}
+  .cover #count,.closing #count{color:rgba(255,255,255,.5)}
+  #hint{position:absolute;right:2vw;top:2.4vh;font-size:.9vw;color:#a8adbd;z-index:30}
+  .cover #hint{color:rgba(255,255,255,.45)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bar"></div>
+  <div id="hint">← → 翻页 · F 全屏</div>
+
+  <!-- 1 cover -->
+  <section class="slide cover on">
+    <div class="eyebrow">MBA / EMBA / DBA · 论文写作工具包</div>
+    <h1>从开题写到答辩<br><span style="opacity:.85">AI 全程陪你走</span></h1>
+    <div class="lead">这是一套"陪你写论文的 AI 助手工具包"。你负责拿主意，AI 帮你查资料、写初稿、改格式、降重、练答辩。<b style="color:#e9e7ff">全程不用懂编程。</b></div>
+    <div class="idea">核心理念：<span class="accent-text" style="background:linear-gradient(120deg,#b9a9ff,#e7b8ff)">你拿主意，AI 干活。</span></div>
+    <div class="chips">
+      <span class="chip"><b>7</b> 个闯关阶段</span>
+      <span class="chip"><b>4</b> 份填空表</span>
+      <span class="chip"><b>9</b> 个文档范例</span>
+      <span class="chip"><b>20</b> 项 AI 技能</span>
+      <span class="chip"><b>75</b> 句现成的话</span>
+    </div>
+    <div class="foot">一看就懂的介绍 · 2026</div>
+  </section>
+
+  <!-- 2 what is it -->
+  <section class="slide">
+    <h2><span class="k">先扫盲</span><br>这到底是个啥？三个词说清楚</h2>
+    <table>
+      <tr><th>你会听到的词</th><th>其实就是</th><th>打个比方</th></tr>
+      <tr><td class="term">Claude Code</td><td>一个能"看见你电脑里论文文件"的 AI 助手，帮你读、写、改</td><td>随叫随到、不用睡觉的论文助理</td></tr>
+      <tr><td class="term">模板</td><td>一个装好了流程、表格、范例的文件夹，照着用就行</td><td>宜家家具的"说明书 + 全套零件"</td></tr>
+      <tr><td class="term">指令（Prompt）</td><td>你发给 AI 的一段话，交代它做什么</td><td>给助理派活儿："帮我查 10 篇文献"</td></tr>
+    </table>
+    <p class="muted" style="margin-top:2vh;font-size:1.3vw">一句话：它把"写论文"拆成几十个小任务，每个都帮你写好了"该对 AI 说哪句话"。你复制、填信息、发出去就行。</p>
+  </section>
+
+  <!-- 3 pain -->
+  <section class="slide">
+    <h2><span class="k">它解决谁的痛</span><br>你也有过这些抓狂时刻吗</h2>
+    <p style="font-size:1.62vw;line-height:1.75">白天上班、晚上带娃、周末还得写论文。<br>
+      开题改了 <b>8 遍</b>还说"不够聚焦"，文献综述被批"<b>像记流水账</b>"，初稿一查重 <b>38%</b>，降重降到怀疑人生。</p>
+    <p style="margin-top:2.2vh;font-size:1.5vw">你也知道该找 AI 帮忙，可每次聊都像鸡同鸭讲——它给的要么太空泛、要么太书面、要么跟你的情况根本不搭。</p>
+    <p style="margin-top:2.6vh;font-size:1.85vw;font-weight:800">问题不在 AI 笨，<span class="accent-text">是你和 AI 之间缺一个"翻译"。</span></p>
+    <p class="muted" style="margin-top:1vh;font-size:1.36vw">这套工具，就是那个"翻译"——每一步该说什么话，它都替你想好了。</p>
+  </section>
+
+  <!-- 4 you decide / ai works -->
+  <section class="slide">
+    <h2><span class="k">核心理念</span><br>你拿主意，AI 干活</h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3>🧭 你来定</h3>
+        <ul class="clean">
+          <li>写什么题目</li><li>用什么理论</li><li>提什么对策</li><li>论文最后什么样</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>⚙️ AI 来干</h3>
+        <ul class="clean">
+          <li>查文献、整理资料</li><li>写初稿、检查逻辑</li><li>排版、配图、降重</li><li>陪你练答辩</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:2.2vh;font-size:1.4vw" class="muted">每个关键地方都得你点头确认——AI 是助手，<b style="color:#1a1c2e">不是替你做决定的枪手</b>。</p>
+  </section>
+
+  <!-- 5 four ways -->
+  <section class="slide">
+    <h2><span class="k">它靠什么帮你</span><br>4 个核心做法</h2>
+    <div class="grid g4">
+      <div class="card"><span class="n">1</span><h3>你拿主意，AI 干活</h3><p>你定方向，AI 出力气；关键处你点头。</p></div>
+      <div class="card"><span class="n">2</span><h3>说人话就行，不用记命令</h3><p>"帮我查近五年你的研究主题的中文核心期刊文献"——直接这么说。</p></div>
+      <div class="card"><span class="n">3</span><h3>看住 AI，不让它瞎编</h3><p>文献必须你先找到、确认是真的，再交给 AI。铁规矩。</p></div>
+      <div class="card"><span class="n">4</span><h3>先求有，再求好</h3><p>先写完、再写好；初稿丑没关系，关键先把逻辑跑通。</p></div>
+    </div>
+  </section>
+
+  <!-- 6 seven phases -->
+  <section class="slide">
+    <h2><span class="k">论文 7 关</span><br>每一关，AI 都陪你过</h2>
+    <div class="flow">
+      <div class="step"><div class="p">第 0 关</div><div class="t">起步</div><div class="o">填好论文档案</div></div>
+      <div class="step"><div class="p">第 1 关</div><div class="t">找文献</div><div class="o">文献库 + 综述</div></div>
+      <div class="step"><div class="p">第 2 关</div><div class="t">搭框架</div><div class="o">论文骨架</div></div>
+      <div class="step"><div class="p">第 3 关</div><div class="t">收数据</div><div class="o">问卷/访谈</div></div>
+      <div class="step"><div class="p">第 4 关</div><div class="t">写正文</div><div class="o">各章 + 图表</div></div>
+      <div class="step"><div class="p">第 5 关</div><div class="t">改稿</div><div class="o">挑错 + 降重</div></div>
+      <div class="step"><div class="p">第 6 关</div><div class="t">答辩</div><div class="o">PPT + 问答</div></div>
+    </div>
+    <p style="margin-top:3vh;font-size:1.4vw" class="muted">每过一关都有一张 <b style="color:#5b3fd6">检查清单</b> 帮你确认做完没有，做完再进下一关——<b style="color:#1a1c2e">不漏东西</b>。</p>
+  </section>
+
+  <!-- 7 what's inside -->
+  <section class="slide">
+    <h2><span class="k">工具包里有啥</span><br>啥都帮你备齐了</h2>
+    <div class="grid g3">
+      <div class="card"><div class="n">📋</div><h3>4 份填空表</h3><p>填上论文信息和学校格式，AI 后面按这个来</p></div>
+      <div class="card"><div class="n">🗺️</div><h3>7 份分步手册</h3><p>就是那 7 关，每步都有现成的话可复制</p></div>
+      <div class="card"><div class="n">📑</div><h3>9 个文档范例</h3><p>论文、问卷、访谈、综述、答辩 PPT……照着填</p></div>
+      <div class="card"><div class="n">🧰</div><h3>20 项 AI 技能</h3><p>查文献、做图表、生成 Word、降重，AI 自动挑用</p></div>
+      <div class="card"><div class="n">🔍</div><h3>审稿报告模板</h3><p>按 8 个维度打分、列出问题清单，给稿子做体检</p></div>
+      <div class="card"><div class="n">🪄</div><h3>两个开局向导</h3><p>网页版双击就能填，三分钟建好项目</p></div>
+    </div>
+  </section>
+
+  <!-- 8 highlight stat -->
+  <section class="slide">
+    <h2><span class="k">招牌一招</span><br>一键"降 AI 味 / 降重"</h2>
+    <div class="stat">
+      <div class="bigstat"><span class="from">&gt;50%</span> <span class="arrow">→</span> <span class="to">11%</span></div>
+      <ul class="clean statside">
+        <li>专治<b>知网"这段是不是 AI 写的"检测</b></li>
+        <li>揪出 <b>16 种</b>典型"AI 腔"，改成像真人写的</li>
+        <li>在一篇真实论文上实测：从 50% 以上降到 11%（单篇结果）</li>
+      </ul>
+    </div>
+    <div class="card" style="margin-top:2.6vh">
+      <h3>它聪明在哪</h3>
+      <p style="font-size:1.26vw">会<b>故意留一点点不完美</b>——因为全改得太"干净整齐"，反而会被认出来是机器修的。（改完仍需你自己读一遍，确认意思没跑偏。）</p>
+    </div>
+  </section>
+
+  <!-- 9 vs self -->
+  <section class="slide">
+    <h2><span class="k">有啥不一样</span><br>跟"我自己直接问 AI"比，好在哪</h2>
+    <table class="vs">
+      <tr><th>对比</th><th>自己直接问 AI</th><th>用这套工具</th></tr>
+      <tr><td>流程</td><td>想到哪问到哪，容易漏步骤</td><td>固定 7 关，有清单兜底，不漏项</td></tr>
+      <tr><td>怎么提问</td><td>每次现编，效果看运气</td><td>几十句打磨好的话，复制就能用</td></tr>
+      <tr><td>会不会被编</td><td>容易被 AI 编造假文献</td><td>有"不准瞎编"的硬规矩看着</td></tr>
+      <tr><td>降重</td><td>普通润色，治标不治本</td><td>专门对付知网检测的工具</td></tr>
+      <tr><td>排版</td><td>自己手动套格式</td><td>按你填的要求，一键生成 Word</td></tr>
+    </table>
+  </section>
+
+  <!-- 10 get started -->
+  <section class="slide">
+    <h2><span class="k">怎么开始用</span><br>最省事的三步</h2>
+    <div class="steps3">
+      <div class="s3"><div class="num">01</div><h3 style="font-size:1.4vw;margin:.6vh 0">复制一份</h3><p class="muted" style="font-size:1.14vw">把模板文件夹复制一份，改名"我的MBA论文"。原件留着下次用。</p></div>
+      <div class="s3"><div class="num">02</div><h3 style="font-size:1.4vw;margin:.6vh 0">建项目</h3><p class="muted" style="font-size:1.14vw">双击 <code>init.html</code> 像填表一样填信息；或把信息发给 AI 让它帮你建。</p></div>
+      <div class="s3"><div class="num">03</div><h3 style="font-size:1.4vw;margin:.6vh 0">照着走</h3><p class="muted" style="font-size:1.14vw">打开第一份手册，从第 0 关开始，一步步往下做。</p></div>
+    </div>
+    <p style="margin-top:2.6vh;font-size:1.3vw" class="muted">📖 每一步带"现成的话"的详细版，见配套的 <b style="color:#5b3fd6">《手把手操作指南》</b>（专为 AI 小白写）。</p>
+  </section>
+
+  <!-- 11 who + summary -->
+  <section class="slide">
+    <h2><span class="k">适合谁用</span><br>会复制粘贴、能上知网就够了</h2>
+    <ul class="clean">
+      <li>正在写 <b>MBA / EMBA / DBA</b> 或其他<b>管理类学位论文</b>的同学</li>
+      <li>偏"<b>分析一家公司、用管理理论帮它解决实际问题</b>"（也支持问卷调研型）</li>
+      <li><b>不用懂编程</b>——会用电脑、会复制粘贴、能上知网就行</li>
+    </ul>
+    <div class="card" style="margin-top:1.4vh;border-left:6px solid #7c6cff">
+      <p style="font-size:1.4vw;color:#1a1c2e">你要做的，是想清楚<b class="accent-text">"我要解决什么问题"</b>；<br>AI 帮你做的，是把答案规范、扎实、查得到出处地写出来。</p>
+    </div>
+  </section>
+
+  <!-- 12 closing -->
+  <section class="slide closing">
+    <h2>少一点对着空白文档发呆的夜晚，<br>多一点"原来论文可以这样一步步推进"。</h2>
+    <div class="sig">祝每一位 MBAer 顺利毕业 🎓</div>
+    <div class="foot">已用一篇真实论文从开题到答辩完整跑通 · 可放心使用</div>
+  </section>
+
+  <div id="count"></div>
+  <div id="dots"></div>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const dotsWrap=document.getElementById('dots');
+  const bar=document.getElementById('bar');
+  const count=document.getElementById('count');
+  let i=0;
+  slides.forEach((_,k)=>{const b=document.createElement('button');b.className='dot';
+    b.onclick=()=>go(k);dotsWrap.appendChild(b);});
+  const dots=[...dotsWrap.children];
+  function go(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+    dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+    bar.style.width=((i)/(slides.length-1)*100)+'%';
+    count.textContent=(i+1).toString().padStart(2,'0')+' / '+slides.length.toString().padStart(2,'0');
+  }
+  function next(){go(i+1)} function prev(){go(i-1)}
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next();}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev();}
+    else if(e.key==='Home'){go(0)} else if(e.key==='End'){go(slides.length-1)}
+    else if(e.key.toLowerCase()==='f'){
+      if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    }
+  });
+  document.getElementById('stage').addEventListener('click',e=>{
+    if(e.target.closest('.dot'))return;
+    (e.clientX < window.innerWidth/2)?prev():next();
+  });
+  go(0);
+</script>
+</body>
+</html>
